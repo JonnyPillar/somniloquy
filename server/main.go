@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting listening")
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 7777))
 	if err != nil {
 		log.Fatal("Something went wrong", err)
