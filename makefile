@@ -1,4 +1,7 @@
-.PHONY: proto
+.PHONY: install proto build-services run-services
+
+install:
+	@dep ensure -v
 
 proto:
 	@protoc -I internal/api/ --go_out=plugins=grpc:internal/api internal/api/audio.proto
