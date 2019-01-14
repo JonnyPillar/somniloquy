@@ -1,0 +1,7 @@
+version: "3"
+services: 
+  services: 
+    build: 
+      context: ./build/package
+      dockerfile: Dockerfile
+    image: jonnypillar/somniloquy-services
