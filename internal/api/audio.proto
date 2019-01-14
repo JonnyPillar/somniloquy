@@ -1,0 +1,21 @@
+syntax = "proto3";
+package api;
+
+message UploadAudioRequest {
+    bytes Content = 1;
+}
+
+service AudioService {
+    rpc Upload(stream UploadAudioRequest) returns (UploadStatus) {}
+}
+
+enum UploadStatusCode {
+    Unknown = 0;
+    Ok = 1;
+    Failed = 2;
+}
+
+message UploadStatus {
+    string Message = 1;
+    UploadStatusCode Code = 2;
+}
