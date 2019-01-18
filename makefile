@@ -11,3 +11,6 @@ build-services:
 
 run-services:
 	@go run cmd/services/main.go
+
+run-client:
+	@go run cmd/client/main.go
