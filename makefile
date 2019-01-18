@@ -1,4 +1,4 @@
-.PHONY: install proto build-services run-services
+.PHONY: install proto build-services run-services run-client test
 
 install:
 	@dep ensure -v
@@ -14,3 +14,6 @@ run-services:
 
 run-client:
 	@go run cmd/client/main.go
+
+test:
+	@go test ./... -cover

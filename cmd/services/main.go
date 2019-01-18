@@ -5,16 +5,20 @@ import (
 	"log"
 	"net"
 
+	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/service"
 	"google.golang.org/grpc"
 )
 
-const port = 7777
-
 func main() {
 	fmt.Println("Starting Up Somoiloquy Service")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	config, err := config.NewServiceConfig()
+	if err != nil {
+		log.Fatal("error occured creating config", err)
+	}
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", config.Port))
 	if err != nil {
 		log.Fatal("Something went wrong", err)
 	}

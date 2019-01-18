@@ -10,17 +10,22 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Configurer ...
+type Configurer interface{}
+
 // Client ...
 type Client struct {
-	as api.AudioServiceClient
+	config Configurer
+	as     api.AudioServiceClient
 }
 
 // NewClient ...
-func NewClient(conn *grpc.ClientConn) *Client {
+func NewClient(config Configurer, conn *grpc.ClientConn) *Client {
 	asc := api.NewAudioServiceClient(conn)
 
 	c := Client{
-		as: asc,
+		config: config,
+		as:     asc,
 	}
 
 	return &c
