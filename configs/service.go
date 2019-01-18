@@ -5,13 +5,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ServiceConfig ...
+// ServiceConfig defines the config for the Services
 type ServiceConfig struct {
 	Environment string `env:"ENV" envDefault:"local"`
 	Port        int    `env:"PORT" envDefault:"7777"`
 }
 
-// NewServiceConfig ...
+// NewServiceConfig initialises a new Service Config and sets the values based on ENV variables
 func NewServiceConfig() (*ServiceConfig, error) {
 	c := ServiceConfig{}
 	err := env.Parse(&c)

@@ -17,3 +17,6 @@ run-client:
 
 test:
 	@go test ./... -cover
+
+test-verbose:
+	@go test ./... -cover -v

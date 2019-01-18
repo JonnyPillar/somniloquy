@@ -9,14 +9,15 @@ import (
 
 const serviceURL = "%s:%d"
 
-// ClientConfig ...
+// ClientConfig defines the config for the Client
 type ClientConfig struct {
-	Environment string `env:"ENV" envDefault:"local"`
-	ServiceHost string `env:"SERVICE_URL" envDefault:"localhost"`
-	ServicePort int    `env:"SERVICE_URL" envDefault:"7777"`
+	Environment     string `env:"ENV" envDefault:"local"`
+	ServiceHost     string `env:"SERVICE_URL" envDefault:"localhost"`
+	ServicePort     int    `env:"SERVICE_URL" envDefault:"7777"`
+	StreamChunkSize int    `env:"STREAM_CHUNK_SIZE" envDefault:"4096"`
 }
 
-// NewClientConfig ...
+// NewClientConfig initialises a new Client Config and sets the values based on ENV variables
 func NewClientConfig() (*ClientConfig, error) {
 	c := ClientConfig{}
 	err := env.Parse(&c)
@@ -27,7 +28,7 @@ func NewClientConfig() (*ClientConfig, error) {
 	return &c, nil
 }
 
-// ServiceURL ...
+// ServiceURL returns a formatted URL for the Services
 func (c ClientConfig) ServiceURL() string {
 	return fmt.Sprintf(serviceURL, c.ServiceHost, c.ServicePort)
 }

@@ -4,23 +4,22 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
-// Configurer ...
-type Configurer interface{}
-
 // Client ...
 type Client struct {
-	config Configurer
+	config *config.ClientConfig
 	as     api.AudioServiceClient
 }
 
 // NewClient ...
-func NewClient(config Configurer, conn *grpc.ClientConn) *Client {
+func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) *Client {
 	asc := api.NewAudioServiceClient(conn)
 
 	c := Client{
@@ -32,34 +31,44 @@ func NewClient(config Configurer, conn *grpc.ClientConn) *Client {
 }
 
 // Send ...
-func (c Client) Send() {
-	input := Record()
+func (c Client) Send() error {
+	chunks := c.data()
 
 	stream, err := c.as.Upload(context.Background())
 	if err != nil {
 		log.Fatal("Something went wrong", err)
 	}
 
-	for i := range input {
-		fmt.Println("Sending Chunk")
+	for i, chunk := range chunks {
+		fmt.Println("Sending Chunk", i)
 		err = stream.Send(&api.UploadAudioRequest{
-			Content: i,
+			Content: chunk,
 		})
 	}
 
 	status, err := stream.CloseAndRecv()
 	if err != nil {
-		err = errors.Wrapf(err,
-			"failed to receive upstream status response")
-		return
+		return errors.Wrapf(err, "failed to receive upstream status response")
 	}
 
 	if status.Code != api.UploadStatusCode_Ok {
-		err = errors.Errorf(
-			"upload failed - msg: %s",
-			status.Message)
-		return
+		return errors.Errorf("upload failed - msg: %s", status.Message)
 	}
 
 	fmt.Println("Response from server: ", status)
+	return nil
+}
+
+func (c Client) data() [][]byte {
+	dat, err := os.Open("./test/data/test.mp3")
+	if err != nil {
+		fmt.Println("error occurred retreiving test audio", err)
+	}
+
+	chunks, err := BufferStream(c.config, dat)
+	if err != nil {
+		fmt.Println("error occurred retreiving test audio", err)
+	}
+
+	return chunks
 }
