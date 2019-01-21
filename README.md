@@ -15,7 +15,7 @@ The Somniloquy project is a tool to record, transcribe and analyse peoples [Somn
 
 ## Docker
 
-The project uses Docker to containerize the client and service applications and manage 
+The project uses Docker to containerize the client and service applications and manage environment dependancies
 
 ## Docker Installation
 
@@ -23,6 +23,8 @@ The project uses Docker to containerize the client and service applications and 
   - `brew install docker`
 - Build Services
   - `make build-services`
+- Run Services Container
+  `docker container run -p 7777:7777 jonnypillar/somniloquy-services`
 
 ## Terraform
 

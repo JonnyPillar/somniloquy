@@ -22,9 +22,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Something went wrong", err)
 	}
-	grpcServer := grpc.NewServer()
 
-	service.RegisterAudioService(grpcServer)
+	grpcServer := grpc.NewServer()
+	service.NewAudioService(config, grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatal("Something went wrong", err)
