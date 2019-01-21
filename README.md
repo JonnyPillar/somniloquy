@@ -4,6 +4,8 @@ The Somniloquy project is a tool to record, transcribe and analyse peoples [Somn
 
 ## Development Setup
 
+- Install PortAudio
+  - `brew install portaudio`
 - Install Dependancies
   - `make install`
 - Run Services
@@ -11,11 +13,22 @@ The Somniloquy project is a tool to record, transcribe and analyse peoples [Somn
 - Run Tests
   - `make test`
 
+## Docker
+
+The project uses Docker to containerize the client and service applications and manage 
+
+## Docker Installation
+
+- Install Docker
+  - `brew install docker`
+- Build Services
+  - `make build-services`
+
 ## Terraform
 
 The project uses Terraform to be able to startup/tear down infrastructure in AWS.
 
-### Installation
+### Terraform Installation
 
 - Install Terraform
   - `brew install terraform`

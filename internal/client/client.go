@@ -1,10 +1,8 @@
 package client
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"os"
+	"time"
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
@@ -12,63 +10,76 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Inputter ...
+type Inputter interface {
+	Start()
+	Close()
+	Read() []int32
+}
+
+// Streamer ...
+type Streamer interface {
+	Send(*api.UploadAudioRequest) error
+	CloseAndRecv() (*api.UploadStatus, error)
+}
+
 // Client ...
 type Client struct {
 	config *config.ClientConfig
-	as     api.AudioServiceClient
+	input  Inputter
 }
 
 // NewClient ...
-func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) *Client {
-	asc := api.NewAudioServiceClient(conn)
+func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) (*Client, error) {
+	m, err := NewMicrophone(config)
+	if err != nil {
+		return nil, errors.Wrap(err, "error occurred creating new Client")
+	}
 
 	c := Client{
 		config: config,
-		as:     asc,
+		input:  m,
 	}
 
-	return &c
+	return &c, nil
 }
 
-// Send ...
-func (c Client) Send() error {
-	chunks := c.data()
+// Stream ...
+func (c Client) Stream(stream Streamer) error {
+	c.input.Start()
+	defer c.input.Close()
 
-	stream, err := c.as.Upload(context.Background())
-	if err != nil {
-		log.Fatal("Something went wrong", err)
-	}
+	shouldSample := true
 
-	for i, chunk := range chunks {
-		fmt.Println("Sending Chunk", i)
-		err = stream.Send(&api.UploadAudioRequest{
-			Content: chunk,
-		})
+	go func() {
+		time.Sleep(c.config.SampleDuration())
+		fmt.Println("Stopping sampling")
+
+		shouldSample = false
+	}()
+
+	for shouldSample {
+		fmt.Println("Sending Chunk")
+
+		req := api.UploadAudioRequest{
+			Content: c.input.Read(),
+		}
+
+		err := stream.Send(&req)
+		if err != nil {
+			return errors.Wrap(err, "error occured sending chunk")
+		}
 	}
 
 	status, err := stream.CloseAndRecv()
 	if err != nil {
-		return errors.Wrapf(err, "failed to receive upstream status response")
+		return errors.Wrap(err, "failed to receive upstream status response")
 	}
 
 	if status.Code != api.UploadStatusCode_Ok {
-		return errors.Errorf("upload failed - msg: %s", status.Message)
+		return errors.Errorf("failed to upload stream. %s", status.Message)
 	}
 
 	fmt.Println("Response from server: ", status)
 	return nil
-}
-
-func (c Client) data() [][]byte {
-	dat, err := os.Open("./test/data/test.mp3")
-	if err != nil {
-		fmt.Println("error occurred retreiving test audio", err)
-	}
-
-	chunks, err := BufferStream(c.config, dat)
-	if err != nil {
-		fmt.Println("error occurred retreiving test audio", err)
-	}
-
-	return chunks
 }

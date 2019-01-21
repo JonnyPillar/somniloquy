@@ -32,6 +32,14 @@
   revision = "347cf4a86c1cb8d262994d8ef5924d4576c5b331"
 
 [[projects]]
+  branch = "master"
+  digest = "1:322ab352ba0fc7db4263e17c71624ba3b4d90365d2074afa57e5eb9214645174"
+  name = "github.com/gordonklaus/portaudio"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "00e7307ccd93051979a933c6fd5ead641eba5686"
+
+[[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -48,21 +56,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
-  version = "v0.1.1"
-
-[[projects]]
-  digest = "1:79c7e1dc6789fc4329a52a4f502cb71fb5d44eccbc665f6f7907c8cc06e48441"
+  digest = "1:8ff03ccc603abb0d7cce94d34b613f5f6251a9e1931eba1a3f9888a9029b055c"
   name = "github.com/stretchr/testify"
   packages = [
-    ".",
     "assert",
-    "http",
-    "mock",
+    "require",
+    "suite",
   ]
   pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
@@ -168,8 +167,9 @@
   input-imports = [
     "github.com/caarlos0/env",
     "github.com/golang/protobuf/proto",
+    "github.com/gordonklaus/portaudio",
     "github.com/pkg/errors",
-    "github.com/stretchr/testify",
+    "github.com/stretchr/testify/suite",
     "google.golang.org/grpc",
   ]
   solver-name = "gps-cdcl"

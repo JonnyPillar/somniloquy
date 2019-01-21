@@ -26,3 +26,4 @@ crash.log
 # are not checked in
 override.tf
 override.tf.json
+*.aiff
