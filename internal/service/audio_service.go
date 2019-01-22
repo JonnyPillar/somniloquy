@@ -1,12 +1,13 @@
 package service
 
 import (
-	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
+	"os"
 
-	"cloud.google.com/go/speech/apiv1"
+	"github.com/go-audio/audio"
+	"github.com/go-audio/wav"
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/pkg/errors"
@@ -29,33 +30,62 @@ func NewAudioService(config *config.ServiceConfig, grpcServer *grpc.Server) {
 
 // Upload ...
 func (s *AudioService) Upload(stream api.AudioService_UploadServer) error {
-	ctx := context.Background()
-	client, err := speech.NewClient(ctx)
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-
-	r := Recording{
-		File: "test_one",
-	}
-
-	// r := NewRecording()
-
-	// for {
-	// 	c, err := stream.Recv()
-
-	// 	if err != nil {
-	// 		if err == io.EOF {
-	// 			break
-	// 		}
-
-	// 		return errors.Wrap(err, "failed unexpectadely while reading chunks from stream")
-	// 	}
-
-	// 	r.Append(c.Content)
+	// ctx := context.Background()
+	// client, err := speech.NewClient(ctx)
+	// if err != nil {
+	// 	log.Fatalf("Failed to create client: %v", err)
 	// }
 
-	// err = r.Save()
+	// r := Recording{
+	// 	File: "test_one",
+	// }
+
+	r := NewRecording()
+
+	of, err := os.Create(r.File + ".wav")
+	if err != nil {
+		panic(err)
+	}
+	enc := wav.NewEncoder(of, s.config.SampleRate, 24, 1, 1)
+	buf := &audio.IntBuffer{Format: &audio.Format{
+		NumChannels: 1,
+		SampleRate:  s.config.SampleRate,
+	}, Data: r.Data}
+
+	for {
+		c, err := stream.Recv()
+
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			return errors.Wrap(err, "failed unexpectadely while reading chunks from stream")
+		}
+
+		r.Append(c.Content)
+
+		z := []int{}
+
+		for _, i := range c.Content {
+			z = append(z, int(i))
+		}
+
+		buf.Data = z
+
+		if err = enc.Write(buf); err != nil {
+			fmt.Println("failed to write to the output file -", err)
+			os.Exit(1)
+		}
+	}
+
+	if err = enc.Close(); err != nil {
+		fmt.Println("failed to close the encoder stream")
+		os.Exit(1)
+	}
+	of.Close()
+
+	// err := r.Save()
 	// if err != nil {
 	// 	return errors.Wrapf(err, "failed to save recording")
 	// }
@@ -64,19 +94,19 @@ func (s *AudioService) Upload(stream api.AudioService_UploadServer) error {
 	// 	log.Fatalf("FFMPEG Error: %v", err)
 	// }
 
-	// Reads the audio file into memory.
-	data, err := ioutil.ReadFile("./assets/recordings/" + r.File + ".flac")
-	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
-	}
+	// // Reads the audio file into memory.
+	// data, err := ioutil.ReadFile("./assets/recordings/" + r.File + ".flac")
+	// if err != nil {
+	// 	log.Fatalf("Failed to read file: %v", err)
+	// }
 
-	ts := NewTranscriptionService(ctx, s.config, client)
-	res, err := ts.Run(data)
-	if err != nil {
-		return errors.Wrap(err, "failed to transcribe audio")
-	}
+	// ts := NewTranscriptionService(ctx, s.config, client)
+	// res, err := ts.Run(data)
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to transcribe audio")
+	// }
 
-	fmt.Println("Transcription Results:", res)
+	// fmt.Println("Transcription Results:", res)
 
 	status := api.UploadStatus{
 		Message: "Upload received with success",

@@ -32,6 +32,22 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:42b801064f0aeb1b9bad0e1b42edf27bc34485bec63b965b9b840e07e6074608"
+  name = "github.com/go-audio/audio"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7b2a6ca214808c64326280ac13268af853543f0b"
+
+[[projects]]
+  branch = "master"
+  digest = "1:d8265bd12a9b80cff23bb0b225318230765a7220500a006392c53a6dc05b1367"
+  name = "github.com/go-audio/wav"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "de841e69b8842aa73e98054d37feb48425f133b8"
+
+[[projects]]
+  branch = "master"
   digest = "1:74f10e2eb9bc56dd8446f2dcf15994894bc577275c77f15be026a3011feead14"
   name = "github.com/golang/protobuf"
   packages = [
@@ -64,6 +80,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "00e7307ccd93051979a933c6fd5ead641eba5686"
+
+[[projects]]
+  branch = "master"
+  digest = "1:8c2ec3f7fa853d374b340831554f225ead9ab4cc6932256f0cffbfef8c78d9f5"
+  name = "github.com/mattetti/audio"
+  packages = ["riff"]
+  pruneopts = "UT"
+  revision = "01576cde1f212c296c0b8ef5fa857169770c75b6"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -277,6 +301,8 @@
   input-imports = [
     "cloud.google.com/go/speech/apiv1",
     "github.com/caarlos0/env",
+    "github.com/go-audio/audio",
+    "github.com/go-audio/wav",
     "github.com/golang/protobuf/proto",
     "github.com/gordonklaus/portaudio",
     "github.com/pkg/errors",

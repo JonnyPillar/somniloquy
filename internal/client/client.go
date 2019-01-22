@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
@@ -50,12 +51,12 @@ func (c Client) Stream(stream Streamer) error {
 
 	shouldSample := true
 
-	// go func() {
-	// 	time.Sleep(c.config.SampleDuration())
-	// 	fmt.Println("Stopping sampling")
+	go func() {
+		time.Sleep(c.config.SampleDuration())
+		fmt.Println("Stopping sampling")
 
-	// 	shouldSample = false
-	// }()
+		shouldSample = false
+	}()
 
 	for shouldSample {
 		fmt.Println("Sending Chunk")
@@ -68,7 +69,6 @@ func (c Client) Stream(stream Streamer) error {
 		if err != nil {
 			return errors.Wrap(err, "error occured sending chunk")
 		}
-		break
 	}
 
 	status, err := stream.CloseAndRecv()

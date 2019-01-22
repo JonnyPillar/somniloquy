@@ -11,7 +11,7 @@ const fileFormat = "./assets/recordings/%s"
 
 // Recording ...
 type Recording struct {
-	data    []int32
+	Data    []int
 	samples int
 	File    string
 }
@@ -25,7 +25,9 @@ func NewRecording() *Recording {
 
 // Append ...
 func (r *Recording) Append(content []int32) {
-	r.data = append(r.data, content...)
+	for _, i := range content {
+		r.Data = append(r.Data, int(i))
+	}
 	r.samples += len(content)
 
 	fmt.Println("Stream Received", r.samples)
@@ -86,7 +88,7 @@ func (r *Recording) Save() error {
 		f.Close()
 	}()
 
-	binary.Write(f, binary.BigEndian, r.data)
+	binary.Write(f, binary.BigEndian, r.Data)
 
 	fmt.Println("Saved recording to ", r.File)
 

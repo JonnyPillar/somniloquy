@@ -27,3 +27,5 @@ crash.log
 override.tf
 override.tf.json
 *.aiff
+*.flac
+*.wav
