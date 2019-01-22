@@ -1,4 +1,8 @@
 
+[prune]
+  go-tests = true
+  unused-packages = true
+
 [[constraint]]
   name = "github.com/golang/protobuf"
   branch = "master"
@@ -24,6 +28,6 @@
   branch = "master"
   name = "github.com/gordonklaus/portaudio"
 
-[prune]
-  go-tests = true
-  unused-packages = true
+[[constraint]]
+  name = "cloud.google.com/go"
+  version = "0.34.0"
