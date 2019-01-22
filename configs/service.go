@@ -7,8 +7,9 @@ import (
 
 // ServiceConfig defines the config for the Services
 type ServiceConfig struct {
-	Environment string `env:"ENV" envDefault:"local"`
-	Port        int    `env:"PORT" envDefault:"7777"`
+	Environment             string `env:"ENV" envDefault:"local"`
+	Port                    int    `env:"PORT" envDefault:"7777"`
+	GoogleAppServicesConfig string `env:"GOOGLE_APPLICATION_CREDENTIALS" envDefault:"~/.gcs/config.json"`
 }
 
 // NewServiceConfig initialises a new Service Config and sets the values based on ENV variables
