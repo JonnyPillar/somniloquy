@@ -10,7 +10,6 @@ import (
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/pkg/errors"
-	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 	"google.golang.org/grpc"
 )
 
@@ -71,29 +70,13 @@ func (s *AudioService) Upload(stream api.AudioService_UploadServer) error {
 		log.Fatalf("Failed to read file: %v", err)
 	}
 
-	// Detects speech in the audio file.
-	resp, err := client.Recognize(ctx, &speechpb.RecognizeRequest{
-		Config: &speechpb.RecognitionConfig{
-			Encoding:        speechpb.RecognitionConfig_FLAC,
-			SampleRateHertz: 44100,
-			LanguageCode:    "en-GB",
-		},
-		Audio: &speechpb.RecognitionAudio{
-			AudioSource: &speechpb.RecognitionAudio_Content{Content: data},
-		},
-	})
+	ts := NewTranscriptionService(ctx, s.config, client)
+	res, err := ts.Run(data)
 	if err != nil {
-		log.Fatalf("failed to recognize: %v", err)
+		return errors.Wrap(err, "failed to transcribe audio")
 	}
 
-	fmt.Println("Response:", resp)
-
-	// Prints the results.
-	for _, result := range resp.Results {
-		for _, alt := range result.Alternatives {
-			fmt.Printf("\"%v\" (confidence=%3f)\n", alt.Transcript, alt.Confidence)
-		}
-	}
+	fmt.Println("Transcription Results:", res)
 
 	status := api.UploadStatus{
 		Message: "Upload received with success",

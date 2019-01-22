@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/jonnypillar/somniloquy/configs"
@@ -17,14 +18,18 @@ func TestServiceConfigSuiteTestSuite(t *testing.T) {
 
 func (s *ServiceConfigSuite) TestNewServiceConfig() {
 	s.T().Run("creates client config with default values", func(t *testing.T) {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "~/.gcs/config.json")
+
 		expectedConfig := config.ServiceConfig{
-			Environment: "local",
-			Port:        7777,
+			Environment:             "local",
+			Port:                    7777,
+			GoogleAppServicesConfig: "~/.gcs/config.json",
+			SampleRate:              44100,
 		}
 
 		c, err := config.NewServiceConfig()
 
-		s.Equal(c, &expectedConfig)
 		s.Nil(err)
+		s.Equal(c, &expectedConfig)
 	})
 }

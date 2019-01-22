@@ -27,8 +27,8 @@ func (s *ClientConfigSuite) TestNewClientConfig() {
 
 		c, err := config.NewClientConfig()
 
-		s.Equal(c, &expectedConfig)
 		s.Nil(err)
+		s.Equal(c, &expectedConfig)
 	})
 }
 
@@ -61,6 +61,36 @@ func (s *ClientConfigSuite) TestClientConfigServiceURL() {
 			url := c.ServiceURL()
 
 			s.Equal(test.expectedURL, url, test.desc)
+		})
+	}
+}
+
+func (s *ClientConfigSuite) TestClientConfigSampleDuration() {
+	var tests = []struct {
+		desc          string
+		sampleSeconds int
+
+		expecteDuration float64
+	}{
+		{
+			"given valid config values, correct duration returned",
+			4,
+
+			4,
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+
+		s.T().Run(test.desc, func(t *testing.T) {
+			c := config.ClientConfig{
+				SampleSeconds: test.sampleSeconds,
+			}
+
+			d := c.SampleDuration()
+
+			s.Equal(test.expecteDuration, d.Seconds(), test.desc)
 		})
 	}
 }
