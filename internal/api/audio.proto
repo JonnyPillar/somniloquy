@@ -2,8 +2,8 @@ syntax = "proto3";
 package api;
 
 message UploadAudioRequest {
-//    bytes Content = 1;
-   repeated int32 Content = 1;
+   bytes Content = 1;
+//    repeated int32 Content = 1;
 }
 
 service AudioService {

@@ -15,7 +15,7 @@ type ClientConfig struct {
 	Environment   string  `env:"ENV" envDefault:"local"`
 	ServiceHost   string  `env:"SERVICE_URL" envDefault:"localhost"`
 	ServicePort   int     `env:"SERVICE_URL" envDefault:"7777"`
-	SampleRate    float64 `env:"SAMPLE_RATE" envDefault:"44100"`
+	SampleRate    float64 `env:"SAMPLE_RATE" envDefault:"16000"`
 	SampleSeconds int     `env:"SAMPLE_SECONDS" envDefault:"7"`
 }
 

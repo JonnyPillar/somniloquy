@@ -39,3 +39,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/go-audio/wav"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mjibson/go-dsp"

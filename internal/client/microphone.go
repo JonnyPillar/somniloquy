@@ -15,7 +15,7 @@ type Microphone struct {
 // NewMicrophone ...
 func NewMicrophone(config *config.ClientConfig) (*Microphone, error) {
 	m := Microphone{}
-	m.results = make([]int32, 64)
+	m.results = make([]int32, 8196)
 
 	portaudio.Initialize()
 	audioStream, err := portaudio.OpenDefaultStream(1, 0, config.SampleRate, len(m.results), &m.results)

@@ -1,6 +1,8 @@
 package client
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"time"
 
@@ -29,6 +31,22 @@ type Client struct {
 	input  Inputter
 }
 
+type ListenOpts struct {
+	State            func(State)
+	QuietDuration    time.Duration
+	AlreadyListening bool
+}
+
+const DefaultQuietTime = time.Second
+
+type State int
+
+const (
+	Waiting State = iota
+	Listening
+	Asking
+)
+
 // NewClient ...
 func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) (*Client, error) {
 	m, err := NewMicrophone(config)
@@ -46,30 +64,105 @@ func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) (*Client, err
 
 // Stream ...
 func (c Client) Stream(stream Streamer) error {
+	in := make([]int16, 8196)
+
 	c.input.Start()
 	defer c.input.Close()
 
-	shouldSample := true
+	opts := ListenOpts{
+		QuietDuration:    1 * time.Second,
+		AlreadyListening: true,
+	}
 
-	go func() {
-		time.Sleep(c.config.SampleDuration())
-		fmt.Println("Stopping sampling")
+	var (
+		buf            bytes.Buffer
+		heardSomething = opts.AlreadyListening
+		quiet          bool
+		quietTime      = opts.QuietDuration
+		quietStart     time.Time
+		lastFlux       float64
+	)
 
-		shouldSample = false
-	}()
+	vad := NewVAD(len(in))
 
-	for shouldSample {
-		fmt.Println("Sending Chunk")
+	if quietTime == 0 {
+		quietTime = DefaultQuietTime
+	}
 
-		req := api.UploadAudioRequest{
-			Content: c.input.Read(),
-		}
-
-		err := stream.Send(&req)
-		if err != nil {
-			return errors.Wrap(err, "error occured sending chunk")
+	if opts.State != nil {
+		if heardSomething {
+			opts.State(Listening)
+		} else {
+			opts.State(Waiting)
 		}
 	}
+
+reader:
+	for {
+		res := c.input.Read()
+
+		err := binary.Write(&buf, binary.LittleEndian, res)
+		if err != nil {
+			return err
+		}
+
+		flux := vad.Flux(res)
+
+		if lastFlux == 0 {
+			lastFlux = flux
+			continue
+		}
+
+		if heardSomething {
+			if flux*1.75 <= lastFlux {
+				if !quiet {
+					quietStart = time.Now()
+				} else {
+					diff := time.Since(quietStart)
+
+					if diff > quietTime {
+						break reader
+					}
+				}
+
+				quiet = true
+			} else {
+				quiet = false
+				lastFlux = flux
+			}
+		} else {
+			if flux >= lastFlux*1.75 {
+				heardSomething = true
+				if opts.State != nil {
+					opts.State(Listening)
+				}
+			}
+
+			lastFlux = flux
+		}
+	}
+
+	// shouldSample := true
+
+	// go func() {
+	// 	time.Sleep(c.config.SampleDuration())
+	// 	fmt.Println("Stopping sampling")
+
+	// 	shouldSample = false
+	// }()
+
+	// for shouldSample {
+	// 	fmt.Println("Sending Chunk")
+
+	req := api.UploadAudioRequest{
+		Content: &buf.Bytes(),
+	}
+
+	err := stream.Send(&req)
+	if err != nil {
+		return errors.Wrap(err, "error occured sending chunk")
+	}
+	// }
 
 	status, err := stream.CloseAndRecv()
 	if err != nil {

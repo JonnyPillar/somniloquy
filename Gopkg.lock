@@ -90,6 +90,17 @@
   revision = "01576cde1f212c296c0b8ef5fa857169770c75b6"
 
 [[projects]]
+  branch = "master"
+  digest = "1:a058b48ec9fad1403482552ed04666f16a244b05b6968a2bc43a6cf6ebc350a8"
+  name = "github.com/mjibson/go-dsp"
+  packages = [
+    "dsputils",
+    "fft",
+  ]
+  pruneopts = "UT"
+  revision = "11479a337f1259210b7c8f93f7bf2b0cc87b066e"
+
+[[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -305,6 +316,7 @@
     "github.com/go-audio/wav",
     "github.com/golang/protobuf/proto",
     "github.com/gordonklaus/portaudio",
+    "github.com/mjibson/go-dsp/fft",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/suite",
     "google.golang.org/genproto/googleapis/cloud/speech/v1",
