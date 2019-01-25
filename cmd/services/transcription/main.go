@@ -16,11 +16,12 @@ func main() {
 		log.Fatal("error occured creating config", err)
 	}
 
-	ts := transcription.NewTranscriptionService(config)
-	err = ts.Start()
+	ts := transcription.NewService(config)
+	results, err := ts.Start()
 	if err != nil {
 		log.Fatal("error occured transcribing", err)
 	}
 
+	fmt.Println(results)
 	fmt.Println("Completed Transcription Service")
 }

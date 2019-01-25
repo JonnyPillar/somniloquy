@@ -16,14 +16,14 @@ import (
 const flacDir = "./assets/recordings/flac/"
 const languageCode = "en-GB"
 
-// TranscriptionService ...
-type TranscriptionService struct {
+// Service ...
+type Service struct {
 	config *config.ServiceConfig
 }
 
-// NewTranscriptionService registers the Audio Service with the gRPC Server
-func NewTranscriptionService(config *config.ServiceConfig) *TranscriptionService {
-	as := TranscriptionService{
+// NewService registers the Audio Service with the gRPC Server
+func NewService(config *config.ServiceConfig) *Service {
+	as := Service{
 		config: config,
 	}
 
@@ -31,16 +31,16 @@ func NewTranscriptionService(config *config.ServiceConfig) *TranscriptionService
 }
 
 // Start ...
-func (ts TranscriptionService) Start() error {
+func (ts Service) Start() (Results, error) {
 	ctx := context.Background()
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		return errors.Wrap(err, "failed to create anew Google Cloud Speech client")
+		return nil, errors.Wrap(err, "failed to create anew Google Cloud Speech client")
 	}
 
 	files, err := ioutil.ReadDir(flacDir)
 	if err != nil {
-		return errors.Wrap(err, "failed to read flac recording dir")
+		return nil, errors.Wrap(err, "failed to read flac recording dir")
 	}
 
 	config := speechpb.RecognitionConfig{
@@ -49,7 +49,7 @@ func (ts TranscriptionService) Start() error {
 		LanguageCode:    languageCode,
 	}
 
-	results := []*transcriptionResponse{}
+	results := Results{}
 	for _, f := range files {
 		if !isFlac(f) {
 			continue
@@ -59,7 +59,7 @@ func (ts TranscriptionService) Start() error {
 		flac := fmt.Sprintf("%s%s", flacDir, f.Name())
 		data, err := ioutil.ReadFile(flac)
 		if err != nil {
-			return errors.Wrap(err, "failed to read flac recording")
+			return nil, errors.Wrap(err, "failed to read flac recording")
 		}
 
 		audio := speechpb.RecognitionAudio{
@@ -76,14 +76,13 @@ func (ts TranscriptionService) Start() error {
 		// Detects speech in the audio file.
 		resp, err := client.Recognize(ctx, &req)
 		if err != nil {
-			return errors.Wrap(err, "error occurred sending recording to Google Cloud Services API")
+			return nil, errors.Wrap(err, "error occurred sending recording to Google Cloud Services API")
 		}
 
-		results = append(results, newTranscriptionResponse(resp))
+		results = append(results, newGCSResults(resp))
 	}
 
-	fmt.Println("Transcription Results:", results)
-	return nil
+	return results, nil
 }
 
 func isFlac(f os.FileInfo) bool {
