@@ -1,4 +1,4 @@
-package service
+package record
 
 import (
 	"encoding/binary"
@@ -7,19 +7,22 @@ import (
 	"time"
 )
 
-const fileFormat = "./assets/recordings/%s"
+const (
+	aiffExt = "aiff"
+	aiffDir = "./assets/recordings/aiff/"
+)
 
 // Recording ...
 type Recording struct {
 	data    []int32
 	samples int
-	File    string
+	file    string
 }
 
 // NewRecording ...
 func NewRecording() *Recording {
 	return &Recording{
-		File: fmt.Sprintf(fileFormat, time.Now().Format("2006-01-02 15:04:05")),
+		file: fmt.Sprintf("%s%s.%s", aiffDir, time.Now().Format("2006-01-02 15:04:05"), aiffExt),
 	}
 }
 
@@ -33,7 +36,7 @@ func (r *Recording) Append(content []int32) {
 
 // Save ...
 func (r *Recording) Save() error {
-	f, err := os.Create(r.File + ".aiff")
+	f, err := os.Create(r.file)
 	if err != nil {
 		return err
 	}
@@ -88,7 +91,7 @@ func (r *Recording) Save() error {
 
 	binary.Write(f, binary.BigEndian, r.data)
 
-	fmt.Println("Saved recording to ", r.File)
+	fmt.Println("Saved recording to ", r.file)
 
 	return nil
 }

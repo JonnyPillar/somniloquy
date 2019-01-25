@@ -10,7 +10,7 @@ type Input struct {
 }
 
 // Send ...
-func (i Input) Send(*api.UploadAudioRequest) error {
+func (i Input) Send(*api.UploadRecordRequest) error {
 	return i.SendError
 }
 

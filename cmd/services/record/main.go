@@ -6,12 +6,12 @@ import (
 	"net"
 
 	"github.com/jonnypillar/somniloquy/configs"
-	"github.com/jonnypillar/somniloquy/internal/service"
+	"github.com/jonnypillar/somniloquy/internal/service/record"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	fmt.Println("Starting Up Somoiloquy Service")
+	fmt.Println("Starting Up Somoiloquy Record Service")
 
 	config, err := config.NewServiceConfig()
 	if err != nil {
@@ -24,9 +24,11 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	service.NewAudioService(config, grpcServer)
+	record.NewRecordingService(config, grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatal("Something went wrong", err)
 	}
+
+	fmt.Println("Completed Record Service")
 }

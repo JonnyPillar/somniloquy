@@ -1,13 +1,12 @@
 syntax = "proto3";
 package api;
 
-message UploadAudioRequest {
-//    bytes Content = 1;
+message UploadRecordRequest {
    repeated int32 Content = 1;
 }
 
-service AudioService {
-    rpc Upload(stream UploadAudioRequest) returns (UploadStatus) {}
+service RecordService {
+    rpc Upload(stream UploadRecordRequest) returns (UploadStatus) {}
 }
 
 enum UploadStatusCode {

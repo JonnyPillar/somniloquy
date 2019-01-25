@@ -29,7 +29,7 @@ func main() {
 		log.Fatal("Error occured creating client", err)
 	}
 
-	asc := api.NewAudioServiceClient(conn)
+	asc := api.NewRecordServiceClient(conn)
 
 	stream, err := asc.Upload(context.Background())
 	if err != nil {
