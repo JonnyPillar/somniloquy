@@ -28,7 +28,7 @@ The project uses Docker to containerize the client and service applications and 
 
 ## Terraform
 
-The project uses Terraform to be able to startup/tear down infrastructure in AWS.
+The project uses Terraform to be able to startup/tear down infrastructure in AWS. We have two environments, dev and live. Run `terraform apply` in the dev dir for development
 
 ### Terraform Installation
 

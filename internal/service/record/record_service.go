@@ -6,6 +6,7 @@ import (
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
+	"github.com/jonnypillar/somniloquy/internal/files"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -26,7 +27,7 @@ func NewRecordingService(config *config.ServiceConfig, grpcServer *grpc.Server) 
 
 // Upload ...
 func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
-	r := NewRecording()
+	r := files.NewAiff()
 
 	for {
 		c, err := stream.Recv()
@@ -42,9 +43,19 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 		r.Append(c.Content)
 	}
 
-	err := r.Save()
+	b, err := r.Save()
 	if err != nil {
 		return errors.Wrapf(err, "failed to save recording")
+	}
+
+	bucket, err := files.NewBucket(s.config)
+	if err != nil {
+		return errors.Wrap(err, "error occured creating s3 bucket")
+	}
+
+	err = bucket.Upload(r.Filename, b)
+	if err != nil {
+		return errors.Wrap(err, "error occured uploading recording to s3 bucket")
 	}
 
 	status := api.UploadStatus{

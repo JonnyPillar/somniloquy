@@ -9,8 +9,8 @@ proto:
 build-services:
 	@docker build -t jonnypillar/somniloquy-services -f ./build/package/services/Dockerfile .
 
-run-audio-service:
-	@go run cmd/services/audio/main.go
+run-record-service:
+	@go run cmd/services/record/main.go
 
 run-conversion-service:
 	@go run cmd/services/conversion/main.go

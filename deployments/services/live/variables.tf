@@ -46,3 +46,9 @@ variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
   default     = "512"
 }
+
+
+variable "audio_upload_bucket_name" {
+  description = "The name of the Audio Upload S3 bucket"
+  default     = "somniloquy-uploads"
+}
