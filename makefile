@@ -9,6 +9,9 @@ proto:
 build-services:
 	@docker build -t jonnypillar/somniloquy-services -f ./build/package/services/Dockerfile .
 
+push-services:
+	@docker push jonnypillar/somniloquy-services
+
 run-record-service:
 	@go run cmd/services/record/main.go
 
