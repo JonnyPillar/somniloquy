@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
@@ -24,6 +26,24 @@ func main() {
 		log.Fatal("Did not connect", err)
 	}
 
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	cancelChan := make(chan os.Signal, 1)
+
+	signal.Notify(cancelChan, os.Interrupt)
+	defer func() {
+		signal.Stop(cancelChan)
+		cancel()
+	}()
+
+	go func() {
+		select {
+		case <-cancelChan:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
+
 	c, err := client.NewClient(config, conn)
 	if err != nil {
 		log.Fatal("Error occured creating client", err)
@@ -36,7 +56,7 @@ func main() {
 		log.Fatal(err, "an error occured creating upload stream")
 	}
 
-	err = c.Stream(stream)
+	err = c.Stream(ctx, stream)
 	if err != nil {
 		log.Fatal(err, "an error occured creating upload stream")
 	}

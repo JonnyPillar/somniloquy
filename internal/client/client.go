@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -45,29 +46,31 @@ func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) (*Client, err
 }
 
 // Stream ...
-func (c Client) Stream(stream Streamer) error {
+func (c Client) Stream(ctx context.Context, stream Streamer) error {
 	c.input.Start()
 	defer c.input.Close()
 
-	shouldSample := true
+	timer := time.NewTimer(c.config.SampleDuration())
 
-	go func() {
-		time.Sleep(c.config.SampleDuration())
-		fmt.Println("Stopping sampling")
+loop:
+	for {
+		select {
+		case <-ctx.Done():
+			break loop
+		case <-timer.C:
+			fmt.Println("Streamer Timer Ended")
+			break loop
+		default:
+			fmt.Println("Sending Chunk")
 
-		shouldSample = false
-	}()
+			req := api.UploadRecordRequest{
+				Content: c.input.Read(),
+			}
 
-	for shouldSample {
-		fmt.Println("Sending Chunk")
-
-		req := api.UploadRecordRequest{
-			Content: c.input.Read(),
-		}
-
-		err := stream.Send(&req)
-		if err != nil {
-			return errors.Wrap(err, "error occured sending chunk")
+			err := stream.Send(&req)
+			if err != nil {
+				return errors.Wrap(err, "error occured sending chunk")
+			}
 		}
 	}
 
