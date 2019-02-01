@@ -8,17 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/pkg/errors"
 )
 
-const (
-	aiffDir = "./assets/recordings/aiff/"
-	flacDir = "./assets/recordings/flac/"
-)
-
 // Run ...
-func Run() (int, error) {
-	files, err := ioutil.ReadDir(aiffDir)
+func Run(config config.ServiceConfig) (int, error) {
+	files, err := ioutil.ReadDir(config.AIFFRecordingFilePath)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to read aiff recording dir")
 	}
@@ -26,30 +22,31 @@ func Run() (int, error) {
 	var conversionCount int
 
 	for _, f := range files {
-		if !isAiff(f) {
+		if !isAiffFile(f) {
 			continue
 		}
 
-		aiff := fmt.Sprintf("%s%s", aiffDir, f.Name())
-		flac := fmt.Sprintf("%s%s", flacDir, f.Name())
-		flac = strings.Replace(flac, ".aiff", ".flac", 1)
+		fileName := f.Name()
+		a := aiffFile(config, fileName)
+		f := flacFile(config, fileName)
 
-		if flacExists(flac) {
+		if flacExists(f) {
 			continue
 		}
 
-		if err := exec.Command("ffmpeg", "-i", aiff, "-c:a", "flac", flac).Run(); err != nil {
+		err := exec.Command("ffmpeg", "-i", a, "-c:a", "flac", f).Run()
+		if err != nil {
 			return conversionCount, errors.Wrap(err, "error occured converting aiff files to flac")
 		}
 
-		fmt.Println("Converted: " + aiff + " to Flac:" + flac)
+		fmt.Println("Converted: " + a + " to Flac:" + f)
 		conversionCount++
 	}
 
 	return conversionCount, nil
 }
 
-func isAiff(f os.FileInfo) bool {
+func isAiffFile(f os.FileInfo) bool {
 	if !f.Mode().IsRegular() {
 		return false
 	}
@@ -71,4 +68,18 @@ func flacExists(filename string) bool {
 	}
 
 	return true
+}
+
+func flacFile(config config.ServiceConfig, fileName string) string {
+	flac := recordingFilePath(config.FLACRecordingFilePath, fileName)
+
+	return strings.Replace(flac, ".aiff", ".flac", 1)
+}
+
+func aiffFile(config config.ServiceConfig, fileName string) string {
+	return recordingFilePath(config.AIFFRecordingFilePath, fileName)
+}
+
+func recordingFilePath(filePath, fileName string) string {
+	return fmt.Sprintf("%s%s", filePath, fileName)
 }

@@ -11,7 +11,8 @@ type ServiceConfig struct {
 	GoogleAppServicesConfig string   `env:"GOOGLE_APPLICATION_CREDENTIALS" envDefault:"~/.gcs/config.json"`
 	SampleRate              int      `env:"SAMPLE_RATE" envDefault:"44100"`
 	UploadDestinations      []string `env:"UPLOAD_DESTINATIONS" envDefault:"file"`
-	RecordingFilePath       string   `env:"RECORDING_FILE_PATH" envDefault:"./assets/recordings/aiff/"`
+	AIFFRecordingFilePath   string   `env:"AIFF_RECORDING_FILE_PATH" envDefault:"./assets/recordings/aiff/"`
+	FLACRecordingFilePath   string   `env:"FLAC_RECORDING_FILE_PATH" envDefault:"./assets/recordings/aiff/"`
 	AWSRegion               string   `env:"AWS_REGION" envDefault:"eu-west-1"`
 	AWSUploadS3BucketName   string   `env:"AWS_UPLOAD_S3_BUCKET_NAME" envDefault:"dev-somniloquy-uploads"`
 }
