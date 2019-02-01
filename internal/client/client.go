@@ -47,31 +47,9 @@ func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) (*Client, err
 
 // Stream ...
 func (c Client) Stream(ctx context.Context, stream Streamer) error {
-	c.input.Start()
-	defer c.input.Close()
-
-	timer := time.NewTimer(c.config.SampleDuration())
-
-loop:
-	for {
-		select {
-		case <-ctx.Done():
-			break loop
-		case <-timer.C:
-			fmt.Println("Streamer Timer Ended")
-			break loop
-		default:
-			fmt.Println("Sending Chunk")
-
-			req := api.UploadRecordRequest{
-				Content: c.input.Read(),
-			}
-
-			err := stream.Send(&req)
-			if err != nil {
-				return errors.Wrap(err, "error occured sending chunk")
-			}
-		}
+	err := c.recordMicrophone(ctx, stream)
+	if err != nil {
+		return errors.Wrap(err, "error occured recording microphone")
 	}
 
 	status, err := stream.CloseAndRecv()
@@ -85,4 +63,32 @@ loop:
 
 	fmt.Println("Response from server: ", status)
 	return nil
+}
+
+func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
+	c.input.Start()
+	defer c.input.Close()
+	timer := time.NewTimer(c.config.SampleDuration())
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Streamer Signalled")
+			return nil
+		case <-timer.C:
+			fmt.Println("Streamer Timer Ended")
+			return nil
+		default:
+			fmt.Println("Sending Chunk")
+
+			req := api.UploadRecordRequest{
+				Content: c.input.Read(),
+			}
+
+			err := stream.Send(&req)
+			if err != nil {
+				return errors.Wrap(err, "error occured sending chunk")
+			}
+		}
+	}
 }

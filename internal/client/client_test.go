@@ -1,6 +1,7 @@
 package client_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -128,7 +129,7 @@ func (s *ClientSuite) TestClientSend() {
 		s.T().Run(test.desc, func(t *testing.T) {
 			c, _ := client.NewClient(&test.config, &grpc.ClientConn{})
 
-			err := c.Stream(test.input)
+			err := c.Stream(context.Background(), test.input)
 
 			if test.expectedError != nil && s.Error(err) {
 				s.EqualError(err, test.expectedError.Error(), test.desc)

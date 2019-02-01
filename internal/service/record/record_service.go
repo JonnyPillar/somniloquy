@@ -2,12 +2,13 @@ package record
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
-	"github.com/jonnypillar/somniloquy/internal/files"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
@@ -35,7 +36,7 @@ func NewRecordingService(config *config.ServiceConfig, grpcServer *grpc.Server, 
 
 // Upload ...
 func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
-	r := files.NewAiff()
+	r := NewAiffEncoder()
 
 	for {
 		c, err := stream.Recv()
@@ -51,13 +52,14 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 		r.Append(c.Content)
 	}
 
-	b, err := r.Buffer()
+	b, err := r.Encode()
 	if err != nil {
 		return errors.Wrapf(err, "failed to create recording buffer")
 	}
 
+	fn := aiffFileName()
 	for _, saver := range s.savers {
-		saver.Save(r.Filename, b)
+		saver.Save(fn, b)
 	}
 
 	status := api.UploadStatus{
@@ -73,4 +75,8 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 	log.Println("Upload Successful")
 
 	return nil
+}
+
+func aiffFileName() string {
+	return fmt.Sprintf("%s.%s", time.Now().Format("2006-01-02 15:04:05"), aiffExt)
 }

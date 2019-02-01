@@ -7,7 +7,6 @@ import (
 
 // ServiceConfig defines the config for the Services
 type ServiceConfig struct {
-	Environment             string   `env:"ENV" envDefault:"local"`
 	Port                    int      `env:"PORT" envDefault:"7777"`
 	GoogleAppServicesConfig string   `env:"GOOGLE_APPLICATION_CREDENTIALS" envDefault:"~/.gcs/config.json"`
 	SampleRate              int      `env:"SAMPLE_RATE" envDefault:"44100"`

@@ -21,13 +21,13 @@ func (s *ServiceConfigSuite) TestNewServiceConfig() {
 		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "~/.gcs/config.json")
 
 		expectedConfig := config.ServiceConfig{
-			Environment:             "local",
 			Port:                    7777,
 			GoogleAppServicesConfig: "~/.gcs/config.json",
 			SampleRate:              44100,
 			UploadDestinations:      []string{"file"},
-			AWSUploadS3BucketName:   "dev-somniloquy-uploads",
+			RecordingFilePath:       "./assets/recordings/aiff/",
 			AWSRegion:               "eu-west-1",
+			AWSUploadS3BucketName:   "dev-somniloquy-uploads",
 		}
 
 		c, err := config.NewServiceConfig()

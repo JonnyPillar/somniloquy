@@ -16,12 +16,13 @@ import (
 type S3Bucket struct {
 	bucket     *s3.S3
 	bucketName string
-	dir        string
+	filePath   string
 }
 
 // NewS3Bucket ...
 func NewS3Bucket(config *config.ServiceConfig) (*S3Bucket, error) {
 	fmt.Println("Initilising S3 Saver")
+
 	creds := credentials.NewCredentials(&credentials.SharedCredentialsProvider{})
 	_, err := creds.Get()
 	if err != nil {
@@ -33,7 +34,7 @@ func NewS3Bucket(config *config.ServiceConfig) (*S3Bucket, error) {
 	return &S3Bucket{
 		bucket:     svc,
 		bucketName: config.AWSUploadS3BucketName,
-		dir:        config.RecordingFilePath,
+		filePath:   config.RecordingFilePath,
 	}, nil
 }
 
@@ -41,7 +42,7 @@ func NewS3Bucket(config *config.ServiceConfig) (*S3Bucket, error) {
 func (b S3Bucket) Save(filename string, by *bytes.Buffer) error {
 	data := by.Bytes()
 	fileBytes := bytes.NewReader(data)
-	filePath := b.dir + filename
+	filePath := b.filePath + filename
 
 	params := &s3.PutObjectInput{
 		Bucket:        aws.String(b.bucketName),
