@@ -10,7 +10,6 @@ import (
 
 const (
 	aiffExt = "aiff"
-	aiffDir = "./assets/recordings/aiff/"
 )
 
 // Aiff ...
@@ -23,7 +22,7 @@ type Aiff struct {
 // NewAiff ...
 func NewAiff() *Aiff {
 	return &Aiff{
-		Filename: fmt.Sprintf("%s%s.%s", aiffDir, time.Now().Format("2006-01-02 15:04:05"), aiffExt),
+		Filename: fmt.Sprintf("%s.%s", time.Now().Format("2006-01-02 15:04:05"), aiffExt),
 	}
 }
 
@@ -35,8 +34,8 @@ func (r *Aiff) Append(content []int32) {
 	fmt.Println("Stream Received", r.samples)
 }
 
-// Save ...
-func (r *Aiff) Save() (*bytes.Buffer, error) {
+// Buffer ...
+func (r *Aiff) Buffer() (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	f := bufio.NewWriter(&b)
 
@@ -77,8 +76,6 @@ func (r *Aiff) Save() (*bytes.Buffer, error) {
 	binary.Write(f, binary.BigEndian, int32(0))             //offset
 	binary.Write(f, binary.BigEndian, int32(0))             //block
 	binary.Write(f, binary.BigEndian, r.data)
-
-	fmt.Println("Saved to ", r.Filename)
 
 	return &b, nil
 }

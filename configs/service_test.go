@@ -25,7 +25,7 @@ func (s *ServiceConfigSuite) TestNewServiceConfig() {
 			Port:                    7777,
 			GoogleAppServicesConfig: "~/.gcs/config.json",
 			SampleRate:              44100,
-			UploadDestination:       "file",
+			UploadDestinations:      []string{"file"},
 			AWSUploadS3BucketName:   "dev-somniloquy-uploads",
 			AWSRegion:               "eu-west-1",
 		}

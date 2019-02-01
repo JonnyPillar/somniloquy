@@ -15,10 +15,9 @@
   version = "v0.34.0"
 
 [[projects]]
-  digest = "1:94bd119f23e9c818c26147621749e1e2aac23236e2092f27fdb7e671d8e0c497"
+  digest = "1:7fbdc0ca5fc0b0bb66b81ec2fdca82fbe64416742267f11aceb8ed56e6ca3121"
   name = "github.com/aws/aws-sdk-go"
   packages = [
-    ".",
     "aws",
     "aws/awserr",
     "aws/awsutil",
@@ -327,7 +326,6 @@
   analyzer-version = 1
   input-imports = [
     "cloud.google.com/go/speech/apiv1",
-    "github.com/aws/aws-sdk-go",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/aws/aws-sdk-go/aws/session",

@@ -1,7 +1,8 @@
-package files
+package record
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -11,14 +12,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Bucket ...
-type Bucket struct {
+// S3Bucket ...
+type S3Bucket struct {
 	bucket     *s3.S3
 	bucketName string
+	dir        string
 }
 
-// NewBucket ...
-func NewBucket(config *config.ServiceConfig) (*Bucket, error) {
+// NewS3Bucket ...
+func NewS3Bucket(config *config.ServiceConfig) (*S3Bucket, error) {
+	fmt.Println("Initilising S3 Saver")
 	creds := credentials.NewCredentials(&credentials.SharedCredentialsProvider{})
 	_, err := creds.Get()
 	if err != nil {
@@ -27,22 +30,22 @@ func NewBucket(config *config.ServiceConfig) (*Bucket, error) {
 	cfg := aws.NewConfig().WithRegion(config.AWSRegion).WithCredentials(creds)
 	svc := s3.New(session.New(), cfg)
 
-	return &Bucket{
+	return &S3Bucket{
 		bucket:     svc,
 		bucketName: config.AWSUploadS3BucketName,
+		dir:        config.RecordingFilePath,
 	}, nil
 }
 
-// Upload ...
-func (b Bucket) Upload(filename string, by *bytes.Buffer) error {
+// Save ...
+func (b S3Bucket) Save(filename string, by *bytes.Buffer) error {
 	data := by.Bytes()
-
 	fileBytes := bytes.NewReader(data)
-	path := "/media/" + filename
+	filePath := b.dir + filename
 
 	params := &s3.PutObjectInput{
 		Bucket:        aws.String(b.bucketName),
-		Key:           aws.String(path),
+		Key:           aws.String(filePath),
 		Body:          fileBytes,
 		ContentLength: aws.Int64(int64(len(data))),
 		ContentType:   aws.String("aiff"),
@@ -52,6 +55,8 @@ func (b Bucket) Upload(filename string, by *bytes.Buffer) error {
 	if err != nil {
 		return errors.Wrap(err, "error occured uploading file to s3 bucket")
 	}
+
+	fmt.Println("Saved file to S3:", filename)
 
 	return nil
 }

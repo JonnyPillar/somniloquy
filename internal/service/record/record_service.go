@@ -1,6 +1,7 @@
 package record
 
 import (
+	"bytes"
 	"io"
 	"log"
 
@@ -11,15 +12,22 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Saver ...
+type Saver interface {
+	Save(string, *bytes.Buffer) error
+}
+
 // RecordingService defines the Record gRPC Service
 type RecordingService struct {
 	config *config.ServiceConfig
+	savers []Saver
 }
 
 // NewRecordingService registers the Record Service with the gRPC Server
-func NewRecordingService(config *config.ServiceConfig, grpcServer *grpc.Server) {
+func NewRecordingService(config *config.ServiceConfig, grpcServer *grpc.Server, savers ...Saver) {
 	rs := RecordingService{
 		config: config,
+		savers: savers,
 	}
 
 	api.RegisterRecordServiceServer(grpcServer, &rs)
@@ -43,19 +51,13 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 		r.Append(c.Content)
 	}
 
-	b, err := r.Save()
+	b, err := r.Buffer()
 	if err != nil {
-		return errors.Wrapf(err, "failed to save recording")
+		return errors.Wrapf(err, "failed to create recording buffer")
 	}
 
-	bucket, err := files.NewBucket(s.config)
-	if err != nil {
-		return errors.Wrap(err, "error occured creating s3 bucket")
-	}
-
-	err = bucket.Upload(r.Filename, b)
-	if err != nil {
-		return errors.Wrap(err, "error occured uploading recording to s3 bucket")
+	for _, saver := range s.savers {
+		saver.Save(r.Filename, b)
 	}
 
 	status := api.UploadStatus{
