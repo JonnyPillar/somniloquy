@@ -13,18 +13,25 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
-const flacDir = "./assets/recordings/flac/"
+// Reader ...
+type Reader interface {
+	//TODO probably not a os.FileInfo from S3
+	Read(string) ([]os.FileInfo, error)
+}
+
 const languageCode = "en-GB"
 
 // Service ...
 type Service struct {
 	config *config.ServiceConfig
+	reader Reader
 }
 
 // NewService registers the Audio Service with the gRPC Server
-func NewService(config *config.ServiceConfig) *Service {
+func NewService(config *config.ServiceConfig, reader Reader) *Service {
 	as := Service{
 		config: config,
+		reader: reader,
 	}
 
 	return &as
@@ -35,12 +42,12 @@ func (ts Service) Start() (Results, error) {
 	ctx := context.Background()
 	client, err := speech.NewClient(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create anew Google Cloud Speech client")
+		return nil, errors.Wrap(err, "failed to create a new Google Cloud Speech client")
 	}
 
-	files, err := ioutil.ReadDir(flacDir)
+	flacFiles, err := ts.reader.Read(ts.config.FLACRecordingFilePath)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read flac recording dir")
+		return nil, errors.Wrap(err, "error occured reading flac recording dir")
 	}
 
 	config := speechpb.RecognitionConfig{
@@ -50,13 +57,12 @@ func (ts Service) Start() (Results, error) {
 	}
 
 	results := Results{}
-	for _, f := range files {
+	for _, f := range flacFiles {
 		if !isFlac(f) {
 			continue
 		}
 
-		// Reads the audio file into memory.
-		flac := fmt.Sprintf("%s%s", flacDir, f.Name())
+		flac := fmt.Sprintf("%s%s", ts.config.FLACRecordingFilePath, f.Name())
 		data, err := ioutil.ReadFile(flac)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to read flac recording")

@@ -2,7 +2,6 @@ package conversion
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,9 +11,30 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Run ...
-func Run(config config.ServiceConfig) (int, error) {
-	files, err := ioutil.ReadDir(config.AIFFRecordingFilePath)
+// Reader ...
+type Reader interface {
+	//TODO probably not a os.FileInfo from S3
+	Read(string) ([]os.FileInfo, error)
+	Exists(string) (bool, error)
+}
+
+// AIFFConverter ...
+type AIFFConverter struct {
+	config config.ServiceConfig
+	reader Reader
+}
+
+// NewAIFFConverter ...
+func NewAIFFConverter(config config.ServiceConfig, reader Reader) *AIFFConverter {
+	return &AIFFConverter{
+		config: config,
+		reader: reader,
+	}
+}
+
+// ToFlac ...
+func (ac AIFFConverter) ToFlac() (int, error) {
+	files, err := ac.reader.Read(ac.config.AIFFRecordingFilePath)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to read aiff recording dir")
 	}
@@ -27,8 +47,10 @@ func Run(config config.ServiceConfig) (int, error) {
 		}
 
 		fileName := f.Name()
-		a := aiffFile(config, fileName)
-		f := flacFile(config, fileName)
+		//TODO as this is no longer happening on the local file system we will need to create a temp AIFF file and convert it to FLAC.
+		//This could happen at the recording stage??
+		a := aiffFile(ac.config, fileName)
+		f := flacFile(ac.config, fileName)
 
 		if flacExists(f) {
 			continue

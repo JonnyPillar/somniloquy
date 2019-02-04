@@ -12,7 +12,6 @@ const serviceURL = "%s:%d"
 
 // ClientConfig defines the config for the Client
 type ClientConfig struct {
-	Environment   string  `env:"ENV" envDefault:"local"`
 	ServiceHost   string  `env:"SERVICE_URL" envDefault:"localhost"`
 	ServicePort   int     `env:"SERVICE_URL" envDefault:"7777"`
 	SampleRate    float64 `env:"SAMPLE_RATE" envDefault:"44100"`

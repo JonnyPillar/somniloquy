@@ -18,7 +18,6 @@ func TestClientConfigSuiteTestSuite(t *testing.T) {
 func (s *ClientConfigSuite) TestNewClientConfig() {
 	s.T().Run("creates client config with default values", func(t *testing.T) {
 		expectedConfig := config.ClientConfig{
-			Environment:   "local",
 			ServiceHost:   "localhost",
 			ServicePort:   7777,
 			SampleRate:    44100,

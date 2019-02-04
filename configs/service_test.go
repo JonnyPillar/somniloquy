@@ -25,7 +25,8 @@ func (s *ServiceConfigSuite) TestNewServiceConfig() {
 			GoogleAppServicesConfig: "~/.gcs/config.json",
 			SampleRate:              44100,
 			UploadDestinations:      []string{"file"},
-			RecordingFilePath:       "./assets/recordings/aiff/",
+			AIFFRecordingFilePath:   "./assets/recordings/aiff/",
+			FLACRecordingFilePath:   "./assets/recordings/flac/",
 			AWSRegion:               "eu-west-1",
 			AWSUploadS3BucketName:   "dev-somniloquy-uploads",
 		}
