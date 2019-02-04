@@ -1,10 +1,14 @@
 # Somniloquy
 
-The Somniloquy project is a tool to record, transcribe and analyse peoples [Somniloquy](https://en.wikipedia.org/wiki/Somniloquy) or sleep talking as its better known.
+The Somniloquy project is a tool to record, transcribe and analyse peoples [Somniloquy](https://en.wikipedia.org/wiki/Somniloquy) or sleep talking as its better known. We say some highly amusing things in our sleep.
+
+Our subconscious likes to say many funny/embarrassing/disturbing things in our sleep. It would be a shame if we didn't keep a transcribed record of those moments for everyone to enjoy.
+
+This project was inspired by the [PISleepTalk](https://thomaskekeisen.de/en/blog/record-sleeptalk-pisleeptalk/) and is still a work in progress.
 
 ## Prerequisite
 
-This solution uses the [PortAudio](http://portaudio.com/) library for Microphone I/O. This needs to be installed on any machine that is running the Client application.
+This audio stream has been hacked together using a Raspberry PI & USB microphone. As a result we are using the [PortAudio](http://portaudio.com/) library for microphone I/O. This needs to be installed on any PI that is running the Client application.
 
 - OSX
   - `brew install portaudio`
@@ -46,7 +50,9 @@ The project uses Docker to containerize the client and service applications and 
 
 ## Terraform
 
-The project uses Terraform to be able to startup/tear down infrastructure in AWS. We have two environments, dev and live. Run `terraform apply` in the dev dir for development
+The project uses Terraform to be able to startup/tear down infrastructure in AWS. We have two environments, dev and live. 
+
+If you are running locally and using AWS, run `terraform apply` in the dev dir for development to create the required basic AWS infrastructure.
 
 ### Terraform Installation
 
@@ -59,9 +65,21 @@ The project uses Terraform to be able to startup/tear down infrastructure in AWS
 
 ### Commands
 
+- Go to the environment folder
+  - Dev `cd deployments/services/dev`
+  - Live `cd deployments/services/live`
 - Check infrastructure changes are valid
   - `terraform plan`
 - Apply infrastructure changes
   - `terraform apply`
 - Tear down infrastructure changes
   - `terraform destroy`
+
+## TODO
+
+- [] Create a sleep talking Gopher. Is it a real Go project if it doesn't?
+- [] Isolate the PortAudio dependency
+- [] Add DST Analysis to remove empty recordings
+- [] Remove Stream->AIFF->Flac step
+- [] Update Terraform to use Kubernetes instead of AWS Fargate
+- [] Add website
