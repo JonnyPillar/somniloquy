@@ -7,8 +7,8 @@ import (
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
+	"github.com/jonnypillar/somniloquy/internal/service"
 	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
-	"github.com/jonnypillar/somniloquy/internal/service/record"
 	"google.golang.org/grpc"
 )
 
@@ -36,7 +36,7 @@ func main() {
 		log.Fatal("Something went wrong", err)
 	}
 
-	rs := record.NewRecordingService(config, s)
+	rs := service.NewRecordingService(config, s)
 
 	api.RegisterRecordServiceServer(grpcServer, rs)
 

@@ -1,12 +1,12 @@
-package record_test
+package service_test
 
 import (
 	"testing"
 
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
-	"github.com/jonnypillar/somniloquy/internal/service/record"
-	"github.com/jonnypillar/somniloquy/internal/service/record/fake"
+	"github.com/jonnypillar/somniloquy/internal/service"
+	"github.com/jonnypillar/somniloquy/internal/service/fake"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 )
@@ -84,7 +84,7 @@ func (s *RecordingServiceSuite) TestUpload() {
 
 		s.T().Run(test.desc, func(t *testing.T) {
 			c := config.ServiceConfig{}
-			rs := record.NewRecordingService(&c, test.saver)
+			rs := service.NewRecordingService(&c, test.saver)
 
 			//Subject
 			err := rs.Upload(&test.stream)

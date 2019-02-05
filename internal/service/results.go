@@ -1,4 +1,4 @@
-package transcription
+package service
 
 import (
 	"fmt"

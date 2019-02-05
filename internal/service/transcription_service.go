@@ -1,4 +1,4 @@
-package transcription
+package service
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"cloud.google.com/go/speech/apiv1"
 	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
 	"github.com/pkg/errors"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
@@ -16,15 +17,10 @@ import (
 const flacDir = "./assets/recordings/flac/"
 const languageCode = "en-GB"
 
-// Reader ...
-type Reader interface {
-	Read() ([]os.FileInfo, error)
-}
-
 // Service ...
 type Service struct {
 	config *config.ServiceConfig
-	reader Reader
+	reader filesystem.Reader
 }
 
 // NewService registers the Audio Service with the gRPC Server

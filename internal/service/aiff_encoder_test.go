@@ -1,10 +1,9 @@
-package record_test
+package service_test
 
 import (
 	"testing"
 
-	"github.com/jonnypillar/somniloquy/internal/service/record"
-
+	"github.com/jonnypillar/somniloquy/internal/service"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -35,7 +34,7 @@ func (s *AiffEncoderSuite) TestAiffEncoderAppend() {
 		test := test
 
 		s.T().Run(test.desc, func(t *testing.T) {
-			ae := record.NewAiffEncoder()
+			ae := service.NewAiffEncoder()
 
 			ae.Append(test.data)
 

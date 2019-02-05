@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/internal/service"
 	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
-	"github.com/jonnypillar/somniloquy/internal/service/transcription"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 		log.Fatal("Something went wrong", err)
 	}
 
-	ts := transcription.NewService(config, r)
+	ts := service.NewService(config, r)
 	results, err := ts.Start()
 	if err != nil {
 		log.Fatal("error occured transcribing", err)
