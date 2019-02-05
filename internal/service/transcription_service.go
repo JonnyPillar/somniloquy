@@ -14,18 +14,20 @@ import (
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
-const flacDir = "./assets/recordings/flac/"
-const languageCode = "en-GB"
+const (
+	languageCode = "en-GB"
+	flacExt      = ".flac"
+)
 
-// Service ...
-type Service struct {
+// TranscriptionService encapsulates the service that transcribes sleep talking recordings
+type TranscriptionService struct {
 	config *config.ServiceConfig
 	reader filesystem.Reader
 }
 
-// NewService registers the Audio Service with the gRPC Server
-func NewService(config *config.ServiceConfig, reader Reader) *Service {
-	as := Service{
+// NewTranscriptionService initialises a Transcription Service
+func NewTranscriptionService(config *config.ServiceConfig, reader Reader) *TranscriptionService {
+	as := TranscriptionService{
 		config: config,
 		reader: reader,
 	}
@@ -33,8 +35,9 @@ func NewService(config *config.ServiceConfig, reader Reader) *Service {
 	return &as
 }
 
-// Start ...
-func (ts Service) Start() (Results, error) {
+// Start loads any recordings from the source and sends them the GCS Transcription service.Start
+// The results of the request are returned on completion
+func (ts TranscriptionService) Start() (TranscriptionResults, error) {
 	ctx := context.Background()
 	client, err := speech.NewClient(ctx)
 	if err != nil {
@@ -52,14 +55,14 @@ func (ts Service) Start() (Results, error) {
 		LanguageCode:    languageCode,
 	}
 
-	results := Results{}
+	results := TranscriptionResults{}
 	for _, f := range files {
 		if !isFlac(f) {
 			continue
 		}
 
 		// Reads the audio file into memory.
-		flac := fmt.Sprintf("%s%s", flacDir, f.Name())
+		flac := fmt.Sprintf("%s%s", ts.config.FLACRecordingFilePath, f.Name())
 		data, err := ioutil.ReadFile(flac)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to read flac recording")
@@ -82,7 +85,7 @@ func (ts Service) Start() (Results, error) {
 			return nil, errors.Wrap(err, "error occurred sending recording to Google Cloud Services API")
 		}
 
-		results = append(results, newGCSResults(resp))
+		results = append(results, NewTranscriptionResult(resp))
 	}
 
 	return results, nil
@@ -93,7 +96,7 @@ func isFlac(f os.FileInfo) bool {
 		return false
 	}
 
-	if filepath.Ext(f.Name()) != ".flac" {
+	if filepath.Ext(f.Name()) != flacExt {
 		return false
 	}
 

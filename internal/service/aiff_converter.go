@@ -70,7 +70,7 @@ func isAiffFile(f os.FileInfo) bool {
 		return false
 	}
 
-	if filepath.Ext(f.Name()) != ".aiff" {
+	if filepath.Ext(f.Name()) != aiffExt {
 		return false
 	}
 
@@ -92,7 +92,7 @@ func flacExists(filename string) bool {
 func (ac AIFFConverter) flacFile(fileName string) string {
 	flac := recordingFilePath(ac.config.FLACRecordingFilePath, fileName)
 
-	return strings.Replace(flac, ".aiff", ".flac", 1)
+	return strings.Replace(flac, aiffExt, flacExt, 1)
 }
 
 func (ac AIFFConverter) aiffFile(fileName string) string {

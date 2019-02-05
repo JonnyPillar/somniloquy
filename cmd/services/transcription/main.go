@@ -22,7 +22,7 @@ func main() {
 		log.Fatal("Something went wrong", err)
 	}
 
-	ts := service.NewService(config, r)
+	ts := service.NewTranscriptionService(config, r)
 	results, err := ts.Start()
 	if err != nil {
 		log.Fatal("error occured transcribing", err)
