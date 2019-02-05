@@ -8,12 +8,23 @@ This project was inspired by the [PISleepTalk](https://thomaskekeisen.de/en/blog
 
 ## Prerequisite
 
+### Port Audio
+
 This audio stream has been hacked together using a Raspberry PI & USB microphone. As a result we are using the [PortAudio](http://portaudio.com/) library for microphone I/O. This needs to be installed on any PI that is running the Client application.
 
 - OSX
   - `brew install portaudio`
 - Linux
   - `apt-get install portaudio19-dev`
+
+### Dep
+
+- Dependency management is done using [Dep](https://golang.github.io/dep/).
+
+- OSX
+  - `brew install dep`
+- Linux
+  - `apt-get install dep`
 
 ## Development Setup
 
@@ -77,9 +88,9 @@ If you are running locally and using AWS, run `terraform apply` in the dev dir f
 
 ## TODO
 
-- [] Create a sleep talking Gopher. Is it a real Go project if it doesn't?
-- [] Isolate the PortAudio dependency
-- [] Add DST Analysis to remove empty recordings
-- [] Remove Stream->AIFF->Flac step
-- [] Update Terraform to use Kubernetes instead of AWS Fargate
-- [] Add website
+- [ ] Create a sleep talking Gopher. Is it a real Go project if it doesn't?
+- [ ] Isolate the PortAudio dependency
+- [ ] Add DST Analysis to remove empty recordings
+- [ ] Remove Stream->AIFF->Flac step
+- [ ] Update Terraform to use Kubernetes instead of AWS Fargate
+- [ ] Add website
