@@ -24,8 +24,10 @@ func (s *ServiceConfigSuite) TestNewServiceConfig() {
 			Port:                    7777,
 			GoogleAppServicesConfig: "~/.gcs/config.json",
 			SampleRate:              44100,
-			UploadDestinations:      []string{"file"},
-			RecordingFilePath:       "./assets/recordings/aiff/",
+			UploadDestination:       "file",
+			ReadDestination:         "file",
+			AIFFRecordingFilePath:   "./assets/recordings/aiff/",
+			FLACRecordingFilePath:   "./assets/recordings/flac/",
 			AWSRegion:               "eu-west-1",
 			AWSUploadS3BucketName:   "dev-somniloquy-uploads",
 		}

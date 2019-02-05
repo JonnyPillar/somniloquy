@@ -88,7 +88,7 @@ If you are running locally and using AWS, run `terraform apply` in the dev dir f
 
 ## TODO
 
-- [ ] Create a sleep talking Gopher. Is it a real Go project if it doesn't?
+- [ ] Create a sleep talking Gopher. Is it a real Go project if it doesn't have its own Gopher?
 - [ ] Isolate the PortAudio dependency
 - [ ] Add DST Analysis to remove empty recordings
 - [ ] Remove Stream->AIFF->Flac step

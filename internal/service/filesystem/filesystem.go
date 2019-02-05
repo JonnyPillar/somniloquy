@@ -1,4 +1,4 @@
-package record
+package filesystem
 
 import (
 	"bytes"
@@ -9,21 +9,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-// File ...
-type File struct {
+// FileSystem ...
+//TODO rename this or the package name
+type FileSystem struct {
 	dir string
 }
 
-// NewFile ...
-func NewFile(config *config.ServiceConfig) *File {
-	fmt.Println("Initilising File Saver")
-	return &File{
-		dir: config.RecordingFilePath,
+// NewFileSystem ...
+func NewFileSystem(config *config.ServiceConfig) *FileSystem {
+	fmt.Println("Initilising FileSystem Saver")
+	return &FileSystem{
+		dir: config.AIFFRecordingFilePath,
 	}
 }
 
 // Save ...
-func (f File) Save(filename string, by *bytes.Buffer) error {
+func (f FileSystem) Save(filename string, by *bytes.Buffer) error {
 	filePath := f.dir + filename
 	file, err := os.Create(filePath)
 	if err != nil {
@@ -38,4 +39,9 @@ func (f File) Save(filename string, by *bytes.Buffer) error {
 
 	fmt.Println("Saved file to file system:", filePath)
 	return nil
+}
+
+// Read ...
+func (f FileSystem) Read() ([]os.FileInfo, error) {
+	return nil, nil
 }

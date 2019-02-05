@@ -92,7 +92,7 @@ func (s *ClientSuite) TestClientSend() {
 				SendError: errors.New("an error occured"),
 			},
 
-			errors.New("error occured sending chunk: an error occured"),
+			errors.New("error occured recording microphone: error occured sending chunk: an error occured"),
 		},
 		{
 			"given an error occurs closing and receiving stream, error is returned",
@@ -135,7 +135,6 @@ func (s *ClientSuite) TestClientSend() {
 				s.EqualError(err, test.expectedError.Error(), test.desc)
 			} else {
 				s.Nil(err, test.desc)
-				// s.NotNil(m, test.desc)
 			}
 		})
 	}

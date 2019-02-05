@@ -16,15 +16,22 @@ import (
 const flacDir = "./assets/recordings/flac/"
 const languageCode = "en-GB"
 
+// Reader ...
+type Reader interface {
+	Read() ([]os.FileInfo, error)
+}
+
 // Service ...
 type Service struct {
 	config *config.ServiceConfig
+	reader Reader
 }
 
 // NewService registers the Audio Service with the gRPC Server
-func NewService(config *config.ServiceConfig) *Service {
+func NewService(config *config.ServiceConfig, reader Reader) *Service {
 	as := Service{
 		config: config,
+		reader: reader,
 	}
 
 	return &as
@@ -38,7 +45,7 @@ func (ts Service) Start() (Results, error) {
 		return nil, errors.Wrap(err, "failed to create anew Google Cloud Speech client")
 	}
 
-	files, err := ioutil.ReadDir(flacDir)
+	files, err := ts.reader.Read()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read flac recording dir")
 	}

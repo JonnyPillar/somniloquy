@@ -6,6 +6,8 @@ import (
 	"net"
 
 	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/internal/api"
+	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
 	"github.com/jonnypillar/somniloquy/internal/service/record"
 	"google.golang.org/grpc"
 )
@@ -29,35 +31,18 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	s, err := savers(config)
+	s, err := filesystem.GetSaver(config)
 	if err != nil {
 		log.Fatal("Something went wrong", err)
 	}
 
-	record.NewRecordingService(config, grpcServer, s...)
+	rs := record.NewRecordingService(config, s)
+
+	api.RegisterRecordServiceServer(grpcServer, rs)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatal("Something went wrong", err)
 	}
 
 	fmt.Println("Completed Record Service")
-}
-
-func savers(config *config.ServiceConfig) ([]record.Saver, error) {
-	savers := []record.Saver{}
-
-	for _, i := range config.UploadDestinations {
-		if i == fileSaverKey {
-			savers = append(savers, record.NewFile(config))
-		} else if i == s3SaverKey {
-			s3, err := record.NewS3Bucket(config)
-			if err != nil {
-				return nil, err
-			}
-
-			savers = append(savers, s3)
-		}
-	}
-
-	return savers, nil
 }

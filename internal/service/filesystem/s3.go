@@ -1,8 +1,9 @@
-package record
+package filesystem
 
 import (
 	"bytes"
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -34,7 +35,7 @@ func NewS3Bucket(config *config.ServiceConfig) (*S3Bucket, error) {
 	return &S3Bucket{
 		bucket:     svc,
 		bucketName: config.AWSUploadS3BucketName,
-		filePath:   config.RecordingFilePath,
+		filePath:   config.FLACRecordingFilePath,
 	}, nil
 }
 
@@ -60,4 +61,9 @@ func (b S3Bucket) Save(filename string, by *bytes.Buffer) error {
 	fmt.Println("Saved file to S3:", filename)
 
 	return nil
+}
+
+// Read ...
+func (S3Bucket) Read() ([]os.FileInfo, error) {
+	return nil, nil
 }

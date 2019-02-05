@@ -10,7 +10,6 @@ import (
 	"github.com/jonnypillar/somniloquy/configs"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/pkg/errors"
-	"google.golang.org/grpc"
 )
 
 // Saver ...
@@ -21,17 +20,17 @@ type Saver interface {
 // RecordingService defines the Record gRPC Service
 type RecordingService struct {
 	config *config.ServiceConfig
-	savers []Saver
+	saver  Saver
 }
 
 // NewRecordingService registers the Record Service with the gRPC Server
-func NewRecordingService(config *config.ServiceConfig, grpcServer *grpc.Server, savers ...Saver) {
+func NewRecordingService(c *config.ServiceConfig, s Saver) *RecordingService {
 	rs := RecordingService{
-		config: config,
-		savers: savers,
+		config: c,
+		saver:  s,
 	}
 
-	api.RegisterRecordServiceServer(grpcServer, &rs)
+	return &rs
 }
 
 // Upload ...
@@ -54,12 +53,13 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 
 	b, err := r.Encode()
 	if err != nil {
-		return errors.Wrapf(err, "failed to create recording buffer")
+		return errors.Wrap(err, "failed to create recording buffer")
 	}
 
 	fn := aiffFileName()
-	for _, saver := range s.savers {
-		saver.Save(fn, b)
+	err = s.saver.Save(fn, b)
+	if err != nil {
+		return errors.Wrap(err, "error occured saving recording")
 	}
 
 	status := api.UploadStatus{

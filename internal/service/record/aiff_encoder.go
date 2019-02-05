@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"fmt"
+	"errors"
 )
 
 const (
@@ -13,8 +13,7 @@ const (
 
 // AiffEncoder ...
 type AiffEncoder struct {
-	data    []int32
-	samples int
+	data []int32
 }
 
 // NewAiffEncoder ...
@@ -23,17 +22,24 @@ func NewAiffEncoder() *AiffEncoder {
 }
 
 // Append ...
-func (ae *AiffEncoder) Append(content []int32) {
-	ae.data = append(ae.data, content...)
-	ae.samples += len(content)
+func (ae *AiffEncoder) Append(data []int32) {
+	ae.data = append(ae.data, data...)
+}
 
-	fmt.Println("Stream Received", ae.samples)
+// SampleCount ...
+func (ae *AiffEncoder) SampleCount() int {
+	return len(ae.data)
 }
 
 // Encode ...
 func (ae *AiffEncoder) Encode() (*bytes.Buffer, error) {
 	var b bytes.Buffer
 	f := bufio.NewWriter(&b)
+	c := ae.SampleCount()
+
+	if c == 0 {
+		return nil, errors.New("no data to encode")
+	}
 
 	// form chunk
 	_, err := f.WriteString("FORM")
@@ -54,7 +60,7 @@ func (ae *AiffEncoder) Encode() (*bytes.Buffer, error) {
 	}
 	binary.Write(f, binary.BigEndian, int32(18))                       //size
 	binary.Write(f, binary.BigEndian, int16(1))                        //channels
-	binary.Write(f, binary.BigEndian, int32(ae.samples))               //number of samples
+	binary.Write(f, binary.BigEndian, int32(c))                        //number of samples
 	binary.Write(f, binary.BigEndian, int16(32))                       //bits per sample
 	_, err = f.Write([]byte{0x40, 0x0e, 0xac, 0x44, 0, 0, 0, 0, 0, 0}) //80-bit sample rate 44100
 	if err != nil {
@@ -76,9 +82,9 @@ func (ae *AiffEncoder) Encode() (*bytes.Buffer, error) {
 }
 
 func (ae *AiffEncoder) formSize() int32 {
-	return int32(4 + 8 + 18 + 8 + 8 + 4*ae.samples)
+	return int32(4 + 8 + 18 + 8 + 8 + 4*ae.SampleCount())
 }
 
 func (ae *AiffEncoder) soundSize() int32 {
-	return int32(4*ae.samples + 8)
+	return int32(4*ae.SampleCount() + 8)
 }

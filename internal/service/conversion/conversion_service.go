@@ -2,7 +2,6 @@ package conversion
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,9 +11,28 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Run ...
-func Run(config config.ServiceConfig) (int, error) {
-	files, err := ioutil.ReadDir(config.AIFFRecordingFilePath)
+// Reader ...
+type Reader interface {
+	Read() ([]os.FileInfo, error)
+}
+
+// AIFFConverter ...
+type AIFFConverter struct {
+	config *config.ServiceConfig
+	reader Reader
+}
+
+// NewAIFFConverter ...
+func NewAIFFConverter(config *config.ServiceConfig, reader Reader) *AIFFConverter {
+	return &AIFFConverter{
+		config: config,
+		reader: reader,
+	}
+}
+
+// ToFlac ...
+func (ac AIFFConverter) ToFlac() (int, error) {
+	files, err := ac.reader.Read()
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to read aiff recording dir")
 	}
@@ -27,8 +45,9 @@ func Run(config config.ServiceConfig) (int, error) {
 		}
 
 		fileName := f.Name()
-		a := aiffFile(config, fileName)
-		f := flacFile(config, fileName)
+		//TODO rename methods
+		a := ac.aiffFile(fileName)
+		f := ac.flacFile(fileName)
 
 		if flacExists(f) {
 			continue
@@ -70,14 +89,14 @@ func flacExists(filename string) bool {
 	return true
 }
 
-func flacFile(config config.ServiceConfig, fileName string) string {
-	flac := recordingFilePath(config.FLACRecordingFilePath, fileName)
+func (ac AIFFConverter) flacFile(fileName string) string {
+	flac := recordingFilePath(ac.config.FLACRecordingFilePath, fileName)
 
 	return strings.Replace(flac, ".aiff", ".flac", 1)
 }
 
-func aiffFile(config config.ServiceConfig, fileName string) string {
-	return recordingFilePath(config.AIFFRecordingFilePath, fileName)
+func (ac AIFFConverter) aiffFile(fileName string) string {
+	return recordingFilePath(ac.config.AIFFRecordingFilePath, fileName)
 }
 
 func recordingFilePath(filePath, fileName string) string {

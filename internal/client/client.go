@@ -79,7 +79,7 @@ func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
 			fmt.Println("Streamer Timer Ended")
 			return nil
 		default:
-			fmt.Println("Sending Chunk")
+			// fmt.Println("Sending Chunk")
 
 			req := api.UploadRecordRequest{
 				Content: c.input.Read(),
