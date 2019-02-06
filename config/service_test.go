@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/stretchr/testify/suite"
 )
 

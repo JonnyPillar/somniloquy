@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/pkg/errors"
 )
@@ -36,6 +36,7 @@ func NewRecordingService(c *config.ServiceConfig, s Saver) *RecordingService {
 // Upload ...
 func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 	r := NewAiffEncoder()
+	var count int
 
 	for {
 		c, err := stream.Recv()
@@ -49,7 +50,11 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 		}
 
 		r.Append(c.Content)
+
+		count++
 	}
+
+	fmt.Println("received", count)
 
 	b, err := r.Encode()
 	if err != nil {
@@ -78,5 +83,5 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 }
 
 func aiffFileName() string {
-	return fmt.Sprintf("%s.%s", time.Now().Format("2006-01-02 15:04:05"), aiffExt)
+	return fmt.Sprintf("%s%s", time.Now().Format("2006-01-02 15:04:05"), aiffExt)
 }

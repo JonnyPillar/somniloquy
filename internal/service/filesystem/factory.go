@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os"
 
-	config "github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 )
 
 const (

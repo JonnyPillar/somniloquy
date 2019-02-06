@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/jonnypillar/somniloquy/internal/service"
 	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
 )
@@ -26,7 +26,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Something went wrong", err)
 	}
-	afc := service.NewAIFFConverter(config, r)
+
+	converter := service.FFMPEGConverter{}
+
+	afc := service.NewAIFFConverter(config, r, converter)
 
 	count, err := afc.ToFlac()
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/pkg/errors"
 )
 

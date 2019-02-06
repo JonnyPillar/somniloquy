@@ -3,7 +3,7 @@ package filesystem_test
 import (
 	"testing"
 
-	config "github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
 	"github.com/stretchr/testify/suite"
 )

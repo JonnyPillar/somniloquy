@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -31,18 +31,16 @@ type Client struct {
 }
 
 // NewClient ...
-func NewClient(config *config.ClientConfig, conn *grpc.ClientConn) (*Client, error) {
-	m, err := NewMicrophone(config)
+func NewClient(c *config.ClientConfig, conn *grpc.ClientConn) (*Client, error) {
+	m, err := NewMicrophone(c)
 	if err != nil {
 		return nil, errors.Wrap(err, "error occurred creating new Client")
 	}
 
-	c := Client{
-		config: config,
+	return &Client{
+		config: c,
 		input:  m,
-	}
-
-	return &c, nil
+	}, nil
 }
 
 // Stream ...
@@ -69,17 +67,18 @@ func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
 	c.input.Start()
 	defer c.input.Close()
 	timer := time.NewTimer(c.config.SampleDuration())
+	var count int
 
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Streamer Signalled")
+			fmt.Println("Streamer Signalled, len", count)
 			return nil
 		case <-timer.C:
-			fmt.Println("Streamer Timer Ended")
+			fmt.Println("Streamer Signalled, len", count)
 			return nil
 		default:
-			// fmt.Println("Sending Chunk")
+			fmt.Println("Sending Chunk")
 
 			req := api.UploadRecordRequest{
 				Content: c.input.Read(),
@@ -89,6 +88,8 @@ func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
 			if err != nil {
 				return errors.Wrap(err, "error occured sending chunk")
 			}
+
+			count++
 		}
 	}
 }

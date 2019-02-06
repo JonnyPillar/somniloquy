@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/pkg/errors"
 )
 
@@ -16,21 +16,37 @@ type Reader interface {
 	Read() ([]os.FileInfo, error)
 }
 
+// Converter ...
+type Converter interface {
+	Execute(...string) error
+}
+
+// FFMPEGConverter ...
+type FFMPEGConverter struct{}
+
+// Execute ...
+func (fc FFMPEGConverter) Execute(args ...string) error {
+	return exec.Command("ffmpeg", args...).Run()
+}
+
 // AIFFConverter ...
 type AIFFConverter struct {
-	config *config.ServiceConfig
-	reader Reader
+	config    *config.ServiceConfig
+	reader    Reader
+	converter Converter
 }
 
 // NewAIFFConverter ...
-func NewAIFFConverter(config *config.ServiceConfig, reader Reader) *AIFFConverter {
+func NewAIFFConverter(c *config.ServiceConfig, r Reader, conv Converter) *AIFFConverter {
 	return &AIFFConverter{
-		config: config,
-		reader: reader,
+		config:    c,
+		reader:    r,
+		converter: conv,
 	}
 }
 
 // ToFlac ...
+//TODO wrap the returned int with more info
 func (ac AIFFConverter) ToFlac() (int, error) {
 	files, err := ac.reader.Read()
 	if err != nil {
@@ -43,17 +59,12 @@ func (ac AIFFConverter) ToFlac() (int, error) {
 		if !isAiffFile(f) {
 			continue
 		}
-
 		fileName := f.Name()
 		//TODO rename methods
 		a := ac.aiffFile(fileName)
 		f := ac.flacFile(fileName)
 
-		if flacExists(f) {
-			continue
-		}
-
-		err := exec.Command("ffmpeg", "-i", a, "-c:a", "flac", f).Run()
+		err := ac.converter.Execute("-i", a, "-c:a", "flac", f)
 		if err != nil {
 			return conversionCount, errors.Wrap(err, "error occured converting aiff files to flac")
 		}
@@ -72,18 +83,6 @@ func isAiffFile(f os.FileInfo) bool {
 
 	if filepath.Ext(f.Name()) != aiffExt {
 		return false
-	}
-
-	return true
-}
-
-func flacExists(filename string) bool {
-	_, err := os.Stat(filename)
-
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
 	}
 
 	return true

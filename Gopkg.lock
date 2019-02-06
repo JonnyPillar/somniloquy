@@ -337,6 +337,7 @@
     "github.com/stretchr/testify/suite",
     "google.golang.org/genproto/googleapis/cloud/speech/v1",
     "google.golang.org/grpc",
+    "google.golang.org/grpc/metadata",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

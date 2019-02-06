@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	aiffExt = "aiff"
+	aiffExt = ".aiff"
 )
 
 // AiffEncoder ...

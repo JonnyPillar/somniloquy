@@ -16,7 +16,7 @@ type ClientConfig struct {
 	ServiceHost   string  `env:"SERVICE_URL" envDefault:"localhost"`
 	ServicePort   int     `env:"SERVICE_URL" envDefault:"7777"`
 	SampleRate    float64 `env:"SAMPLE_RATE" envDefault:"44100"`
-	SampleSeconds int     `env:"SAMPLE_SECONDS" envDefault:"7"`
+	SampleSeconds int     `env:"SAMPLE_SECONDS" envDefault:"5"`
 }
 
 // NewClientConfig initialises a new Client Config and sets the values based on ENV variables

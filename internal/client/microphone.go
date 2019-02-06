@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/gordonklaus/portaudio"
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/pkg/errors"
 )
 

@@ -3,7 +3,7 @@ package service_test
 import (
 	"testing"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/jonnypillar/somniloquy/internal/api"
 	"github.com/jonnypillar/somniloquy/internal/service"
 	"github.com/jonnypillar/somniloquy/internal/service/fake"

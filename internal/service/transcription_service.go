@@ -7,8 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"cloud.google.com/go/speech/apiv1"
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/jonnypillar/somniloquy/internal/service/filesystem"
 	"github.com/pkg/errors"
 	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
@@ -19,17 +18,24 @@ const (
 	flacExt      = ".flac"
 )
 
+// SpeechRecogniser ...
+type SpeechRecogniser interface {
+	Recognize(context.Context, *speechpb.RecognizeRequest) (*TranscriptionResult, error)
+}
+
 // TranscriptionService encapsulates the service that transcribes sleep talking recordings
 type TranscriptionService struct {
 	config *config.ServiceConfig
 	reader filesystem.Reader
+	speech SpeechRecogniser
 }
 
 // NewTranscriptionService initialises a Transcription Service
-func NewTranscriptionService(config *config.ServiceConfig, reader Reader) *TranscriptionService {
+func NewTranscriptionService(c *config.ServiceConfig, r Reader, s SpeechRecogniser) *TranscriptionService {
 	as := TranscriptionService{
-		config: config,
-		reader: reader,
+		config: c,
+		reader: r,
+		speech: s,
 	}
 
 	return &as
@@ -37,13 +43,7 @@ func NewTranscriptionService(config *config.ServiceConfig, reader Reader) *Trans
 
 // Start loads any recordings from the source and sends them the GCS Transcription service.Start
 // The results of the request are returned on completion
-func (ts TranscriptionService) Start() (TranscriptionResults, error) {
-	ctx := context.Background()
-	client, err := speech.NewClient(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create anew Google Cloud Speech client")
-	}
-
+func (ts TranscriptionService) Start(ctx context.Context) (TranscriptionResults, error) {
 	files, err := ts.reader.Read()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read flac recording dir")
@@ -61,7 +61,6 @@ func (ts TranscriptionService) Start() (TranscriptionResults, error) {
 			continue
 		}
 
-		// Reads the audio file into memory.
 		flac := fmt.Sprintf("%s%s", ts.config.FLACRecordingFilePath, f.Name())
 		data, err := ioutil.ReadFile(flac)
 		if err != nil {
@@ -79,13 +78,12 @@ func (ts TranscriptionService) Start() (TranscriptionResults, error) {
 			Audio:  &audio,
 		}
 
-		// Detects speech in the audio file.
-		resp, err := client.Recognize(ctx, &req)
+		resp, err := ts.speech.Recognize(ctx, &req)
 		if err != nil {
-			return nil, errors.Wrap(err, "error occurred sending recording to Google Cloud Services API")
+			return nil, errors.Wrap(err, "error occurred recognizing speech")
 		}
 
-		results = append(results, NewTranscriptionResult(resp))
+		results = append(results, resp)
 	}
 
 	return results, nil

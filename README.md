@@ -39,6 +39,10 @@ This audio stream has been hacked together using a Raspberry PI & USB microphone
 - Run Client
   - `make run-client`
 
+## File Structure
+
+The project file structure standards outlined in the [ProjectLayout](https://github.com/golang-standards/project-layout) project.
+
 ## Docker
 
 The project uses Docker to containerize the client and service applications and manage environment dependancies

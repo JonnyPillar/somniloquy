@@ -3,7 +3,7 @@ package config_test
 import (
 	"testing"
 
-	"github.com/jonnypillar/somniloquy/configs"
+	"github.com/jonnypillar/somniloquy/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -22,7 +22,7 @@ func (s *ClientConfigSuite) TestNewClientConfig() {
 			ServiceHost:   "localhost",
 			ServicePort:   7777,
 			SampleRate:    44100,
-			SampleSeconds: 7,
+			SampleSeconds: 5,
 		}
 
 		c, err := config.NewClientConfig()
