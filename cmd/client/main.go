@@ -29,7 +29,7 @@ func main() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	cancelChan := make(chan os.Signal, 1)
-	signal.Notify(cancelChan, os.Interrupt)
+	// signal.Notify(cancelChan, os.Interrupt)
 
 	defer close(cancelChan)
 	defer func() {

@@ -1,6 +1,10 @@
 package client
 
 import (
+	"bytes"
+	"encoding/binary"
+	"fmt"
+
 	"github.com/gordonklaus/portaudio"
 	"github.com/jonnypillar/somniloquy/config"
 	"github.com/pkg/errors"
@@ -34,7 +38,21 @@ func (m *Microphone) Start() {
 }
 
 // Read ...
-func (m *Microphone) Read() []int32 {
+func (m *Microphone) Read(p []byte) (int, error) {
+	m.stream.Read()
+
+	buf := &bytes.Buffer{}
+	for _, v := range m.results {
+		binary.Write(buf, binary.LittleEndian, v)
+	}
+
+	p = buf.Bytes()
+	fmt.Println("buffer:", p[:10], "...", p[len(p)-10:])
+	return len(p), nil
+}
+
+// ReadData ...
+func (m *Microphone) ReadData() []int32 {
 	m.stream.Read()
 	return m.results
 }

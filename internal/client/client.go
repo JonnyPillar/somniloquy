@@ -11,11 +11,28 @@ import (
 	"google.golang.org/grpc"
 )
 
+// DefaultQuietTime ...
+const DefaultQuietTime = time.Second
+
+type State int
+
+const (
+	Waiting State = iota
+	Listening
+	Asking
+)
+
+type ListenOpts struct {
+	State            func(State)
+	QuietDuration    time.Duration
+	AlreadyListening bool
+}
+
 // Inputter ...
 type Inputter interface {
 	Start()
 	Close()
-	Read() []int32
+	ReadData() []int32
 }
 
 // Streamer ...
@@ -69,6 +86,9 @@ func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
 	timer := time.NewTimer(c.config.SampleDuration())
 	var count int
 
+	results := make([]int32, 64)
+	vad := NewVAD(len(results))
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -78,10 +98,12 @@ func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
 			fmt.Println("Streamer Signalled, len", count)
 			return nil
 		default:
+			newData := c.temp(vad)
+
 			fmt.Println("Sending Chunk")
 
 			req := api.UploadRecordRequest{
-				Content: c.input.Read(),
+				Content: newData,
 			}
 
 			err := stream.Send(&req)
@@ -89,7 +111,90 @@ func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
 				return errors.Wrap(err, "error occured sending chunk")
 			}
 
+			status, err := stream.CloseAndRecv()
+			if err != nil {
+				return errors.Wrap(err, "failed to receive upstream status response")
+			}
+
+			if status.Code != api.UploadStatusCode_Ok {
+				return errors.Errorf("failed to upload stream. %s", status.Message)
+			}
+
+			fmt.Println("Response from server: ", status)
+
 			count++
+		}
+	}
+}
+
+func (c Client) temp(vad *VAD) []int32 {
+	newData := []int32{}
+	opts := ListenOpts{}
+	heardSomething := opts.AlreadyListening
+	quietTime := DefaultQuietTime * 5
+	var quietStart time.Time
+	var lastFlux float64
+	var quiet bool
+
+	//Increasing the level increases the input sensitivy. If it is picking up to much background noise, reduce the value
+	level := 0.5
+
+	if opts.State != nil {
+		if heardSomething {
+			opts.State(Listening)
+		} else {
+			opts.State(Waiting)
+		}
+	}
+	fmt.Println("Starting")
+
+	for {
+		// fmt.Println("Sending Chunk")
+
+		data := c.input.ReadData()
+
+		flux := vad.Flux(data)
+		// fmt.Println("Flux Value", flux)
+		if lastFlux == 0 {
+			lastFlux = flux
+			continue
+		}
+
+		if heardSomething {
+			// fmt.Println("f", flux, "l", lastFlux)
+
+			if flux*level <= lastFlux {
+				if !quiet {
+					fmt.Println("Resetting queit start")
+					quietStart = time.Now()
+				} else {
+					diff := time.Since(quietStart)
+
+					if diff > quietTime {
+						fmt.Println("Breaking Reader", diff, len(newData))
+						return newData
+					}
+				}
+				// fmt.Println("quiet")
+
+				quiet = true
+			} else {
+				newData = append(newData, data...)
+
+				fmt.Println("not quiet")
+				quiet = false
+				lastFlux = flux
+			}
+		} else {
+			fmt.Println("Not Heard Something")
+			if flux >= lastFlux*level {
+				heardSomething = true
+				if opts.State != nil {
+					opts.State(Listening)
+				}
+			}
+
+			lastFlux = flux
 		}
 	}
 }

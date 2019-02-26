@@ -54,8 +54,6 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 		count++
 	}
 
-	fmt.Println("received", count)
-
 	b, err := r.Encode()
 	if err != nil {
 		return errors.Wrap(err, "failed to create recording buffer")
