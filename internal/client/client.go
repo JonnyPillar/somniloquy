@@ -44,28 +44,40 @@ func NewClient(c *config.ClientConfig, conn *grpc.ClientConn) (*Client, error) {
 }
 
 // Stream ...
-func (c Client) Stream(ctx context.Context, stream Streamer) error {
-	err := c.recordMicrophone(ctx, stream)
-	if err != nil {
-		return errors.Wrap(err, "error occured recording microphone")
-	}
+func (c Client) Stream(ctx context.Context, asc api.RecordServiceClient) error {
+	c.input.Start()
+	defer c.input.Close()
 
-	status, err := stream.CloseAndRecv()
-	if err != nil {
-		return errors.Wrap(err, "failed to receive upstream status response")
-	}
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+			stream, err := asc.Upload(ctx)
+			if err != nil {
+				errors.Wrap(err, "an error occured creating upload stream")
+			}
 
-	if status.Code != api.UploadStatusCode_Ok {
-		return errors.Errorf("failed to upload stream. %s", status.Message)
-	}
+			err = c.recordMicrophone(ctx, stream)
+			if err != nil {
+				return errors.Wrap(err, "error occured recording microphone")
+			}
 
-	fmt.Println("Response from server: ", status)
-	return nil
+			status, err := stream.CloseAndRecv()
+			if err != nil {
+				return errors.Wrap(err, "failed to receive upstream status response")
+			}
+
+			if status.Code != api.UploadStatusCode_Ok {
+				return errors.Errorf("failed to upload stream. %s", status.Message)
+			}
+
+			fmt.Println("Response from server: ", status)
+		}
+	}
 }
 
 func (c Client) recordMicrophone(ctx context.Context, stream Streamer) error {
-	c.input.Start()
-	defer c.input.Close()
 	timer := time.NewTimer(c.config.SampleDuration())
 	var count int
 

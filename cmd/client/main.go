@@ -52,13 +52,15 @@ func main() {
 
 	asc := api.NewRecordServiceClient(conn)
 
-	stream, err := asc.Upload(context.Background())
+	// stream, err := asc.Upload(context.Background())
+	// if err != nil {
+	// 	log.Fatal(err, "an error occured creating upload stream")
+	// }
+
+	err = c.Stream(ctx, asc)
 	if err != nil {
 		log.Fatal(err, "an error occured creating upload stream")
 	}
 
-	err = c.Stream(ctx, stream)
-	if err != nil {
-		log.Fatal(err, "an error occured creating upload stream")
-	}
+	fmt.Println("Finishing Client")
 }
