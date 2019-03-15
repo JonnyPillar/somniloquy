@@ -21,6 +21,7 @@ type Saver interface {
 type RecordingService struct {
 	config *config.ServiceConfig
 	saver  Saver
+	vad    *VAD
 }
 
 // NewRecordingService registers the Record Service with the gRPC Server
@@ -28,6 +29,7 @@ func NewRecordingService(c *config.ServiceConfig, s Saver) *RecordingService {
 	rs := RecordingService{
 		config: c,
 		saver:  s,
+		vad:    NewVAD(1),
 	}
 
 	return &rs
@@ -54,7 +56,9 @@ func (s *RecordingService) Upload(stream api.RecordService_UploadServer) error {
 		count++
 	}
 
-	fmt.Println("received", count)
+	flux := s.vad.Flux(r.data)
+
+	fmt.Println("received", count, flux)
 
 	b, err := r.Encode()
 	if err != nil {

@@ -56,7 +56,7 @@ func (ac AIFFConverter) ToFlac() (int, error) {
 	var conversionCount int
 
 	for _, f := range files {
-		if !isAiffFile(f) {
+		if !isAiff(f) {
 			continue
 		}
 		fileName := f.Name()
@@ -76,7 +76,7 @@ func (ac AIFFConverter) ToFlac() (int, error) {
 	return conversionCount, nil
 }
 
-func isAiffFile(f os.FileInfo) bool {
+func isAiff(f os.FileInfo) bool {
 	if !f.Mode().IsRegular() {
 		return false
 	}
